@@ -1,7 +1,10 @@
 package com.adaptris.rest;
 
+import java.net.HttpURLConnection;
 import java.util.Properties;
 import org.apache.commons.lang3.ObjectUtils;
+
+import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageListener;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.management.MgmtComponentImpl;
@@ -13,8 +16,8 @@ import lombok.Setter;
 public abstract class AbstractRestfulEndpoint extends MgmtComponentImpl implements AdaptrisMessageListener {
   public static final String MDC_KEY = "ManagementComponent";
 
-  @Getter(AccessLevel.PACKAGE)
-  @Setter(AccessLevel.PACKAGE)
+  @Getter
+  @Setter
   private transient WorkflowServicesConsumer consumer;
 
   @Setter(AccessLevel.PROTECTED)
@@ -45,6 +48,18 @@ public abstract class AbstractRestfulEndpoint extends MgmtComponentImpl implemen
     }).start();
   }
 
+  public void doResponse(AdaptrisMessage orig, AdaptrisMessage proc, String contentType, int httpResponse) {
+    getConsumer().doResponse(orig, proc, contentType, httpResponse);
+  }
+
+  public void doResponse(AdaptrisMessage orig, AdaptrisMessage proc, String contentType) {
+    getConsumer().doResponse(orig, proc, contentType, HttpURLConnection.HTTP_OK);
+  }
+  
+  public void doErrorResponse(AdaptrisMessage message, Exception e, int httpStatus) {
+    getConsumer().doErrorResponse(message, e, httpStatus);
+  }
+  
   protected abstract String getAcceptedFilter();
 
   protected abstract String getDefaultUrlPath();
