@@ -60,7 +60,7 @@ public class WorkflowServicesComponentTest {
 
   @Before
   public void setUp() throws Exception {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     
     message = DefaultMessageFactory.getDefaultInstance().newMessage();
     returnedMessage = DefaultMessageFactory.getDefaultInstance().newMessage();
