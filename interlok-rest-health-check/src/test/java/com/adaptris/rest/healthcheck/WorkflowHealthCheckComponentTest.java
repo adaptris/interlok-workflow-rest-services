@@ -1,4 +1,4 @@
-package com.adaptris.rest;
+package com.adaptris.rest.healthcheck;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,14 +16,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
+
 import org.apache.commons.lang3.StringUtils;
 import org.awaitility.Durations;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageFactory;
 import com.adaptris.core.AdaptrisMessageListener;
@@ -33,7 +37,7 @@ import com.adaptris.core.StoppedState;
 import com.adaptris.core.XStreamJsonMarshaller;
 import com.adaptris.core.http.jetty.JettyConstants;
 import com.adaptris.core.runtime.AdapterManager;
-import com.adaptris.rest.healthcheck.AdapterState;
+import com.adaptris.rest.WorkflowServicesConsumer;
 import com.adaptris.rest.util.JmxMBeanHelper;
 
 public class WorkflowHealthCheckComponentTest {
@@ -71,7 +75,7 @@ public class WorkflowHealthCheckComponentTest {
     JmxMBeanHelper mockJmxHelper = wrapper.jmxHelper();
     TestConsumer testConsumer = wrapper.testConsumer();
 
-    when(mockJmxHelper.getMBeans(anyString())).thenReturn(Collections.EMPTY_SET);
+    when(mockJmxHelper.getMBeans(anyString())).thenReturn(Collections.emptySet());
     try {
       wrapper.start();
       wrapper.healthCheck().onAdaptrisMessage(message);
@@ -140,7 +144,6 @@ public class WorkflowHealthCheckComponentTest {
     AdaptrisMessage message = AdaptrisMessageFactory.getDefaultInstance().newMessage();
     message.addMessageHeader(PATH_KEY, "/workflow-health-check");
     MockedHealthCheckWrapper wrapper = new MockedHealthCheckWrapper().build(true);
-    JmxMBeanHelper mockJmxHelper = wrapper.jmxHelper();
     TestConsumer testConsumer = wrapper.testConsumer();
     try {
       wrapper.start();
@@ -163,7 +166,6 @@ public class WorkflowHealthCheckComponentTest {
     AdaptrisMessage message = AdaptrisMessageFactory.getDefaultInstance().newMessage();
     message.addMessageHeader(PATH_KEY, "/workflow-health-check");
     MockedHealthCheckWrapper wrapper = new MockedHealthCheckWrapper().build(false);
-    JmxMBeanHelper mockJmxHelper = wrapper.jmxHelper();
     TestConsumer testConsumer = wrapper.testConsumer();
     try {
       wrapper.start();
@@ -186,7 +188,6 @@ public class WorkflowHealthCheckComponentTest {
     AdaptrisMessage message = AdaptrisMessageFactory.getDefaultInstance().newMessage();
     message.addMessageHeader(PATH_KEY, "/workflow-health-check/alive");
     MockedHealthCheckWrapper wrapper = new MockedHealthCheckWrapper().build(false);
-    JmxMBeanHelper mockJmxHelper = wrapper.jmxHelper();
     TestConsumer testConsumer = wrapper.testConsumer();
     try {
       wrapper.start();
@@ -206,7 +207,6 @@ public class WorkflowHealthCheckComponentTest {
     AdaptrisMessage message = AdaptrisMessageFactory.getDefaultInstance().newMessage();
     message.addMessageHeader(PATH_KEY, "/workflow-health-check/ready");
     MockedHealthCheckWrapper wrapper = new MockedHealthCheckWrapper().build(false);
-    JmxMBeanHelper mockJmxHelper = wrapper.jmxHelper();
     TestConsumer testConsumer = wrapper.testConsumer();
     try {
       wrapper.start();
@@ -227,7 +227,6 @@ public class WorkflowHealthCheckComponentTest {
     AdaptrisMessage message = AdaptrisMessageFactory.getDefaultInstance().newMessage();
     message.addMessageHeader(PATH_KEY, "/workflow-health-check/ready");
     MockedHealthCheckWrapper wrapper = new MockedHealthCheckWrapper().build(true);
-    JmxMBeanHelper mockJmxHelper = wrapper.jmxHelper();
     TestConsumer testConsumer = wrapper.testConsumer();
     try {
       wrapper.start();
@@ -253,7 +252,7 @@ public class WorkflowHealthCheckComponentTest {
     private JmxMBeanHelper mockJmxHelper;
 
     public MockedHealthCheckWrapper() throws Exception {
-      MockitoAnnotations.initMocks(this);
+      MockitoAnnotations.openMocks(this);
     }
 
     public MockedHealthCheckWrapper build(boolean workflowsAreStarted) throws Exception {
@@ -351,7 +350,7 @@ public class WorkflowHealthCheckComponentTest {
     }
 
     @Override
-    protected void doResponse(AdaptrisMessage originalMessage, AdaptrisMessage processedMessage,
+    public void doResponse(AdaptrisMessage originalMessage, AdaptrisMessage processedMessage,
         String contentType, int status) {
       payload = processedMessage.getContent();
       httpStatus = status;

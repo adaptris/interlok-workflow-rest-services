@@ -1,4 +1,4 @@
-package com.adaptris.rest;
+package com.adaptris.rest.prometheus;
 
 import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_DEFAULT;
 
@@ -6,6 +6,7 @@ import java.util.Properties;
 import java.util.function.Consumer;
 import org.apache.commons.lang3.BooleanUtils;
 import com.adaptris.core.AdaptrisMessage;
+import com.adaptris.rest.AbstractRestfulEndpoint;
 import com.adaptris.rest.metrics.MetricProviders;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;

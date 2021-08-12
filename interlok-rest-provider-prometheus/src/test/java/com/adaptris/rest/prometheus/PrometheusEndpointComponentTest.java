@@ -1,4 +1,4 @@
-package com.adaptris.rest;
+package com.adaptris.rest.prometheus;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -8,10 +8,13 @@ import java.util.Properties;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.DefaultMessageFactory;
+import com.adaptris.rest.MockWorkflowConsumer;
 import com.adaptris.rest.metrics.MetricBinder;
 import com.adaptris.rest.metrics.MetricProviders;
+
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 
@@ -45,8 +48,8 @@ public class PrometheusEndpointComponentTest {
   public void testNoMetrics() throws Exception {
     component.onAdaptrisMessage(message);
 
-    assertFalse(mockConsumer.isError);
-    assertTrue(mockConsumer.payload.equals(""));
+    assertFalse(mockConsumer.isError());
+    assertTrue(mockConsumer.getPayload().equals(""));
   }
 
   @Test
@@ -56,8 +59,8 @@ public class PrometheusEndpointComponentTest {
 
     component.onAdaptrisMessage(message);
 
-    assertFalse(mockConsumer.isError);
-    assertTrue(mockConsumer.payload.contains("test_metric"));
+    assertFalse(mockConsumer.isError());
+    assertTrue(mockConsumer.getPayload().contains("test_metric"));
   }
 
   @Test
@@ -66,16 +69,16 @@ public class PrometheusEndpointComponentTest {
     MetricProviders.getProviders().add(new MockFailingMetricProvider());
     component.onAdaptrisMessage(message);
 
-    assertFalse(mockConsumer.isError);
-    assertTrue(mockConsumer.payload.isEmpty());
+    assertFalse(mockConsumer.isError());
+    assertTrue(mockConsumer.getPayload().isEmpty());
   }
 
   @Test
   public void testErrorResponse() throws Exception {
     component.onAdaptrisMessage(null);
 
-    assertTrue(mockConsumer.isError);
-    assertTrue(mockConsumer.httpStatus == 500);
+    assertTrue(mockConsumer.isError());
+    assertTrue(mockConsumer.getHttpStatus() == 500);
   }
 
   @Test

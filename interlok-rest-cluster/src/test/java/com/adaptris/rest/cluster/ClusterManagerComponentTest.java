@@ -1,4 +1,4 @@
-package com.adaptris.rest;
+package com.adaptris.rest.cluster;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertFalse;
@@ -25,6 +25,7 @@ import com.adaptris.core.XStreamJsonMarshaller;
 import com.adaptris.core.cache.ExpiringMapCache;
 import com.adaptris.mgmt.cluster.ClusterInstance;
 import com.adaptris.mgmt.cluster.mbean.ClusterManagerMBean;
+import com.adaptris.rest.MockWorkflowConsumer;
 import com.adaptris.rest.util.JmxMBeanHelper;
 
 public class ClusterManagerComponentTest {
@@ -89,7 +90,7 @@ public class ClusterManagerComponentTest {
       .until(testConsumer::complete);
 
     // assert no cluster instances;
-    assertFalse(testConsumer.payload.contains("instance"));
+    assertFalse(testConsumer.getPayload().contains("instance"));
   }
 
   @Test
@@ -105,7 +106,7 @@ public class ClusterManagerComponentTest {
       .until(testConsumer::complete);
 
     @SuppressWarnings("unchecked")
-    List<ClusterInstance> instances = (List<ClusterInstance>) new XStreamJsonMarshaller().unmarshal(testConsumer.payload);
+    List<ClusterInstance> instances = (List<ClusterInstance>) new XStreamJsonMarshaller().unmarshal(testConsumer.getPayload());
 
     assertTrue(instances.size() == 1);
     assertTrue(instances.get(0).getUniqueId().equals(clusterInstanceOne.getUniqueId()));
@@ -127,7 +128,7 @@ public class ClusterManagerComponentTest {
       .until(testConsumer::complete);
 
     @SuppressWarnings("unchecked")
-    List<ClusterInstance> instances = (List<ClusterInstance>) new XStreamJsonMarshaller().unmarshal(testConsumer.payload);
+    List<ClusterInstance> instances = (List<ClusterInstance>) new XStreamJsonMarshaller().unmarshal(testConsumer.getPayload());
 
     assertTrue(instances.size() == 2);
     assertTrue(instances.get(0).getUniqueId().equals(clusterInstanceOne.getUniqueId()));
@@ -152,6 +153,6 @@ public class ClusterManagerComponentTest {
       .pollInterval(Durations.ONE_HUNDRED_MILLISECONDS)
       .until(testConsumer::complete);
 
-    assertTrue(testConsumer.isError);
+    assertTrue(testConsumer.isError());
   }
 }

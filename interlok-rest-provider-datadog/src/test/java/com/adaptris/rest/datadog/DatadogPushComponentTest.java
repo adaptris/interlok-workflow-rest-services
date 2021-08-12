@@ -1,4 +1,4 @@
-package com.adaptris.rest;
+package com.adaptris.rest.datadog;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -9,6 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.adaptris.rest.datadog.DatadogPushComponent;
 import com.adaptris.rest.metrics.MetricBinder;
 import com.adaptris.rest.metrics.MetricProviders;
 

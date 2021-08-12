@@ -1,4 +1,4 @@
-package com.adaptris.rest;
+package com.adaptris.rest.healthcheck;
 
 import static com.adaptris.rest.WorkflowServicesConsumer.CONTENT_TYPE_JSON;
 import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_DEFAULT;
@@ -27,10 +27,7 @@ import com.adaptris.core.StartedState;
 import com.adaptris.core.StoppedState;
 import com.adaptris.core.XStreamJsonMarshaller;
 import com.adaptris.core.http.jetty.JettyConstants;
-import com.adaptris.rest.healthcheck.AdapterList;
-import com.adaptris.rest.healthcheck.AdapterState;
-import com.adaptris.rest.healthcheck.ChannelState;
-import com.adaptris.rest.healthcheck.WorkflowState;
+import com.adaptris.rest.AbstractRestfulEndpoint;
 import com.adaptris.rest.util.JmxMBeanHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import lombok.AccessLevel;

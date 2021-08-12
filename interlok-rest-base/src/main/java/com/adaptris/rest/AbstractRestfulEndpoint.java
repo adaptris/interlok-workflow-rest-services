@@ -13,8 +13,8 @@ import lombok.Setter;
 public abstract class AbstractRestfulEndpoint extends MgmtComponentImpl implements AdaptrisMessageListener {
   public static final String MDC_KEY = "ManagementComponent";
 
-  @Getter(AccessLevel.PACKAGE)
-  @Setter(AccessLevel.PACKAGE)
+  @Getter
+  @Setter
   private transient WorkflowServicesConsumer consumer;
 
   @Setter(AccessLevel.PROTECTED)

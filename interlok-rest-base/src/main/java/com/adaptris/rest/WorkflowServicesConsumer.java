@@ -50,19 +50,19 @@ public abstract class WorkflowServicesConsumer implements ComponentLifecycle, Co
 
   protected abstract StandaloneConsumer configureConsumer(AdaptrisMessageListener messageListener, String consumedUrlPath, String acceptedHttpMethods);
 
-  protected void doResponse(AdaptrisMessage original, AdaptrisMessage processed) throws ServiceException {
+  public void doResponse(AdaptrisMessage original, AdaptrisMessage processed) throws ServiceException {
     doResponse(original, processed, CONTENT_TYPE_DEFAULT);
   }
 
-  protected void doResponse(AdaptrisMessage orig, AdaptrisMessage proc, String contentType)
+  public void doResponse(AdaptrisMessage orig, AdaptrisMessage proc, String contentType)
       throws ServiceException {
     doResponse(orig, proc, contentType, OK_200);
   }
 
-  protected abstract void doResponse(AdaptrisMessage orig, AdaptrisMessage proc, String contentType,
+  public abstract void doResponse(AdaptrisMessage orig, AdaptrisMessage proc, String contentType,
       int httpResponse);
 
-  protected abstract void doErrorResponse(AdaptrisMessage message, Exception e, int httpStatus);
+  public abstract void doErrorResponse(AdaptrisMessage message, Exception e, int httpStatus);
 
   @Override
   public void prepare() throws CoreException {

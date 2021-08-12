@@ -70,7 +70,7 @@ public class HttpRestWorkflowServicesConsumer extends WorkflowServicesConsumer {
   }
 
   @Override
-  protected void doResponse(AdaptrisMessage originalMessage, AdaptrisMessage processedMessage,
+  public void doResponse(AdaptrisMessage originalMessage, AdaptrisMessage processedMessage,
       String contentType, int httpStatus) {
     try {
       processedMessage.addObjectHeader(JettyConstants.JETTY_WRAPPER,
