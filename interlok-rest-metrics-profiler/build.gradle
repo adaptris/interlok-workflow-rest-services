@@ -5,13 +5,13 @@ ext {
 }
 
 dependencies {
-	compile project(':interlok-rest-base')
-	compile project(':interlok-rest-metrics-jvm')
-	compile ("com.adaptris:interlok-profiler:$interlokCoreVersion") { changing = true}
+	api project(':interlok-rest-base')
+	api project(':interlok-rest-metrics-jvm')
+	api ("com.adaptris:interlok-profiler:$interlokCoreVersion") { changing = true}
 
-	testCompile project(':interlok-rest-base').sourceSets.test.output
-	testCompile ("com.adaptris:interlok-profiler:$interlokCoreVersion") { changing = true}
-	testImplementation ('io.micrometer:micrometer-registry-prometheus:1.7.0')
+	testImplementation project(':interlok-rest-base').sourceSets.test.output
+	testImplementation ("com.adaptris:interlok-profiler:$interlokCoreVersion") { changing = true}
+	testImplementation ('io.micrometer:micrometer-registry-prometheus:1.7.3')
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {

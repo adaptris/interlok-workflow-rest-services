@@ -5,10 +5,10 @@ ext {
 }
 
 dependencies {
-	compile ("com.adaptris:interlok-cluster-manager:$interlokCoreVersion") { changing = true}
-	compile project(':interlok-rest-base')
+	api ("com.adaptris:interlok-cluster-manager:$interlokCoreVersion") { changing = true}
+	api project(':interlok-rest-base')
 
-	testCompile project(':interlok-rest-base').sourceSets.test.output
+	testImplementation project(':interlok-rest-base').sourceSets.test.output
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {

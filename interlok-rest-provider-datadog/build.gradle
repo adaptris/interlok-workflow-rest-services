@@ -5,9 +5,9 @@ ext {
 }
 
 dependencies {
-	compile project(':interlok-rest-base')
-	compile project(':interlok-rest-metrics-jvm')
-	compile ('io.micrometer:micrometer-registry-datadog:1.7.0')
+	api project(':interlok-rest-base')
+	api project(':interlok-rest-metrics-jvm')
+	api ('io.micrometer:micrometer-registry-datadog:1.7.3')
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {

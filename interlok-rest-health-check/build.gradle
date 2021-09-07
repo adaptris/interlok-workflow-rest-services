@@ -5,7 +5,7 @@ ext {
 }
 
 dependencies {
-	compile project(':interlok-rest-base')
+	api project(':interlok-rest-base')
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
