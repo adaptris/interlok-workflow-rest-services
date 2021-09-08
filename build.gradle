@@ -3,7 +3,7 @@ import org.apache.tools.ant.filters.*
 
 plugins {
   id 'com.github.spotbugs' version '4.7.3' apply false
-  id "io.freefair.lombok" version "5.3.3.3" apply false
+  id "io.freefair.lombok" version "6.1.0" apply false
   id 'org.owasp.dependencycheck' version '6.3.1' apply false
 }
 
@@ -105,7 +105,7 @@ subprojects {
   group   = 'com.adaptris'
   version = releaseVersion
   def versionDir = "$buildDir/version"
-  generateLombokConfig.enabled = false
+  lombok.disableConfig = true
 
   // In this section you declare where to find the dependencies of your project
   repositories {
