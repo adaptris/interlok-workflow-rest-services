@@ -4,11 +4,20 @@ import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageListener;
 import com.adaptris.core.StandaloneConsumer;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class MockWorkflowConsumer extends WorkflowServicesConsumer {
 
-  String payload;
-  boolean isError;
-  int httpStatus = -1;
+  @Getter
+  @Setter
+  private String payload;
+  @Getter
+  @Setter
+  private boolean isError;
+  @Getter
+  @Setter
+  private int httpStatus = -1;
 
   @Override
   protected StandaloneConsumer configureConsumer(AdaptrisMessageListener messageListener, String consumedUrlPath, String acceptedHttpMethods) {

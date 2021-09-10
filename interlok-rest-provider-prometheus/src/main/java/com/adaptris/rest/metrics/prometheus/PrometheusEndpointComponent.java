@@ -1,4 +1,4 @@
-package com.adaptris.rest;
+package com.adaptris.rest.metrics.prometheus;
 
 import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_DEFAULT;
 
@@ -6,6 +6,7 @@ import java.util.Properties;
 import java.util.function.Consumer;
 import org.apache.commons.lang3.BooleanUtils;
 import com.adaptris.core.AdaptrisMessage;
+import com.adaptris.rest.AbstractRestfulEndpoint;
 import com.adaptris.rest.metrics.MetricProviders;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
@@ -20,6 +21,8 @@ public class PrometheusEndpointComponent  extends AbstractRestfulEndpoint {
   private static final String ACCEPTED_FILTER = "GET";
 
   private static final String DEFAULT_PATH = "/prometheus/metrics/*";
+  
+  private static final String CONTENT_TYPE_DEFAULT = "text/plain";
 
   private static final transient boolean ADDITIONAL_DEBUG =
       BooleanUtils.toBoolean(System.getProperty("interlok.prometheus.debug", "false"));
@@ -57,10 +60,10 @@ public class PrometheusEndpointComponent  extends AbstractRestfulEndpoint {
       });
       message.setContent(prometheusRegistry.scrape(), message.getContentEncoding());
 
-      getConsumer().doResponse(message, message);
+      doResponse(message, message, CONTENT_TYPE_DEFAULT);
       success.accept(message);
     } catch (Exception ex) {
-      getConsumer().doErrorResponse(message, ex, ERROR_DEFAULT);
+      doErrorResponse(message, ex, ERROR_DEFAULT);
       failure.accept(message);
     }
   }

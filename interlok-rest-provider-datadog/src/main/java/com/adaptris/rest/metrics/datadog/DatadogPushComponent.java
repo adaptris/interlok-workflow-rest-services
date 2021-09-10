@@ -1,4 +1,4 @@
-package com.adaptris.rest;
+package com.adaptris.rest.metrics.datadog;
 
 import java.time.Duration;
 import java.util.Properties;

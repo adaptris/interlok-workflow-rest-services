@@ -55,6 +55,9 @@ public class WorkflowServicesComponent extends AbstractRestfulEndpoint {
   private static final String OBJECT_PROPERTY_WORKFLOW = "id";
 
   private static final String HTTP_HEADER_HOST = "http.header.Host";
+  
+  private static final String CONTENT_TYPE_DEFAULT = "text/plain";
+  private static final String CONTENT_TYPE_JSON = "application/json";
 
   @Getter(AccessLevel.PACKAGE)
   @Setter(AccessLevel.PACKAGE)
@@ -102,17 +105,17 @@ public class WorkflowServicesComponent extends AbstractRestfulEndpoint {
         SerializableMessage processedMessage = getJmxClient().process(translateTarget, getMessageTranslator().translate(message));
 
         AdaptrisMessage responseMessage = getMessageTranslator().translate(processedMessage);
-        getConsumer().doResponse(message, responseMessage);
+        doResponse(message, responseMessage, CONTENT_TYPE_DEFAULT);
 
       } else { // we'll just return the definition.
         AdaptrisMessage responseMessage = generateDefinitionFile(message.getMetadataValue(HTTP_HEADER_HOST));
-        getConsumer().doResponse(message, responseMessage);
+        doResponse(message, responseMessage, CONTENT_TYPE_JSON);
       }
       onSuccess.accept(message);
 
     } catch (Exception e) {
       log.error("Unable to inject REST message into the workflow.", e);
-      getConsumer().doErrorResponse(message, e, ERROR_BAD_REQUEST);
+      doErrorResponse(message, e, ERROR_BAD_REQUEST);
       onFailure.accept(message);
     } finally {
       MDC.remove(MDC_KEY);

@@ -1,4 +1,4 @@
-package com.adaptris.rest;
+package com.adaptris.rest.healthcheck;
 
 import static com.adaptris.rest.WorkflowServicesConsumer.CONTENT_TYPE_JSON;
 import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_DEFAULT;
@@ -27,10 +27,7 @@ import com.adaptris.core.StartedState;
 import com.adaptris.core.StoppedState;
 import com.adaptris.core.XStreamJsonMarshaller;
 import com.adaptris.core.http.jetty.JettyConstants;
-import com.adaptris.rest.healthcheck.AdapterList;
-import com.adaptris.rest.healthcheck.AdapterState;
-import com.adaptris.rest.healthcheck.ChannelState;
-import com.adaptris.rest.healthcheck.WorkflowState;
+import com.adaptris.rest.AbstractRestfulEndpoint;
 import com.adaptris.rest.util.JmxMBeanHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import lombok.AccessLevel;
@@ -142,7 +139,7 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
     } catch (NotReadyException e) {
       sendPayload(message, String.format("{\"failure\": \"%s\"}", e.getMessage()), ERROR_NOT_READY);
     } catch (Exception e) {
-      getConsumer().doErrorResponse(message, e, ERROR_DEFAULT);
+      doErrorResponse(message, e, ERROR_DEFAULT);
       onFailure.accept(message);
     } finally {
       MDC.remove(MDC_KEY);
@@ -153,7 +150,7 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
   private void sendPayload(AdaptrisMessage message, String newPayload, int httpStatus) {
     // Since JSON should always be UTF-8
     message.setContent(newPayload, StandardCharsets.UTF_8.name());
-    getConsumer().doResponse(message, message, CONTENT_TYPE_JSON, httpStatus);
+    doResponse(message, message, CONTENT_TYPE_JSON, httpStatus);
   }
 
   private void sendPayload(AdaptrisMessage message, Optional<List<AdapterState>> optState) {

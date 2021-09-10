@@ -1,4 +1,4 @@
-package com.adaptris.rest;
+package com.adaptris.rest.cluster;
 import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_DEFAULT;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,8 @@ import com.adaptris.core.CoreException;
 import com.adaptris.core.XStreamJsonMarshaller;
 import com.adaptris.mgmt.cluster.ClusterInstance;
 import com.adaptris.mgmt.cluster.mbean.ClusterManagerMBean;
+import com.adaptris.rest.AbstractRestfulEndpoint;
+import com.adaptris.rest.HttpRestWorkflowServicesConsumer;
 import com.adaptris.rest.util.JmxMBeanHelper;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -58,11 +60,11 @@ public class ClusterManagerComponent extends AbstractRestfulEndpoint {
       String jsonString = new XStreamJsonMarshaller().marshal(clusterInstances);
       message.setContent(jsonString, message.getContentEncoding());
 
-      getConsumer().doResponse(message, message, HttpRestWorkflowServicesConsumer.CONTENT_TYPE_JSON);
+      doResponse(message, message, HttpRestWorkflowServicesConsumer.CONTENT_TYPE_JSON);
       onSuccess.accept(message);
 
     } catch (Exception ex) {
-      getConsumer().doErrorResponse(message, ex, ERROR_DEFAULT);
+      doErrorResponse(message, ex, ERROR_DEFAULT);
       onFailure.accept(message);
     } finally {
       MDC.remove(MDC_KEY);
