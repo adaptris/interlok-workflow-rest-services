@@ -1,6 +1,6 @@
 ext {
-  componentName = 'Interlok Management/REST: Proxy'
-  componentDesc="Proxy another REST endpoint"
+  componentName = 'Interlok Management/Proxy'
+  componentDesc="Proxy another HTTP(s) endpoint"
   delombokTargetDir = new File("${project.projectDir}/src/main/generated")
 }
 
