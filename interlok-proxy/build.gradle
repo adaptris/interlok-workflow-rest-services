@@ -1,0 +1,77 @@
+ext {
+  componentName = 'Interlok Management/Proxy'
+  componentDesc="Proxy another HTTP(s) endpoint"
+  delombokTargetDir = new File("${project.projectDir}/src/main/generated")
+}
+
+dependencies {
+  // The only thing we're actually using is AbstractRestfulEndpoint#MDC_KEY (should we bother?)
+	// api project(':interlok-rest-base')
+  implementation ("org.apache.httpcomponents.client5:httpclient5:5.1")
+  testImplementation ("io.undertow:undertow-core:2.2.10.Final")
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.extensions.delombokTask
+}
+
+jar {
+  manifest {
+    attributes("Built-By": System.getProperty('user.name'),
+              "Build-Jdk": System.getProperty('java.version'),
+              "Implementation-Title": componentName,
+              "Implementation-Version": project.version,
+              "Implementation-Vendor-Id": project.group,
+              "Implementation-Vendor": organizationName)
+  }
+}
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+publishing {
+  publications {
+      mavenJava(MavenPublication) {
+          from components.java
+
+          artifact javadocJar { classifier "javadoc" }
+          artifact sourcesJar { classifier "sources" }
+          pom.withXml {
+            asNode().appendNode("name", componentName)
+            asNode().appendNode("description", componentDesc)
+            def properties = asNode().appendNode("properties")
+            properties.appendNode("target", "4.3.0+")
+            properties.appendNode("tags", "rest,proxy")
+            properties.appendNode("license", "false")
+            properties.appendNode("repository", "https://github.com/adaptris/interlok-workflow-rest-services")
+            properties.appendNode("readme", "https://github.com/adaptris/interlok-workflow-rest-services/raw/develop/interlok-proxy/README.md")
+          }
+      }
+  }
+  repositories {
+    maven {
+      credentials {
+        username repoUsername
+        password repoPassword
+      }
+      url mavenPublishUrl
+    }
+  }
+}
+
+delombok {
+  target = delombokTargetDir
+}
+
+task deleteGeneratedFiles(type: Delete) {
+  delete delombokTargetDir
+}
+
+clean.dependsOn deleteGeneratedFiles
