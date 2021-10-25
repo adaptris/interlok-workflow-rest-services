@@ -162,7 +162,7 @@ subprojects {
     testImplementation ("com.adaptris:interlok-stubs:$interlokCoreVersion") { changing=true }
     testImplementation ("org.mockito:mockito-core:$mockitoVersion")
     testImplementation ("org.mockito:mockito-inline:$mockitoVersion")
-    testImplementation ("org.awaitility:awaitility:4.1.0")
+    testImplementation ("org.awaitility:awaitility:4.1.1")
     // INTERLOK-3233 we still need log4j since we're doing MDC stuffs.
     testImplementation ("org.apache.logging.log4j:log4j-core:$log4j2Version")
     testImplementation ("org.apache.logging.log4j:log4j-api:$log4j2Version")
