@@ -1,1 +1,1 @@
-class=com.adaptris.rest.PrometheusEndpointComponent
+class=com.adaptris.rest.metrics.prometheus.PrometheusEndpointComponent

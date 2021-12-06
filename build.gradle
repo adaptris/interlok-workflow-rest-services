@@ -2,14 +2,14 @@ import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.filters.*
 
 plugins {
-  id 'com.github.spotbugs' version '4.7.2' apply false
-  id "io.freefair.lombok" version "5.3.3.3" apply false
-  id 'org.owasp.dependencycheck' version '6.2.2' apply false
+  id 'com.github.spotbugs' version '4.7.9' apply false
+  id "io.freefair.lombok" version "6.2.0" apply false
+  id 'org.owasp.dependencycheck' version '6.5.0.1' apply false
 }
 
 ext {
-  interlokCoreVersion = project.findProperty('interlokCoreVersion') ?: '4.2-SNAPSHOT'
-  releaseVersion = project.findProperty('releaseVersion') ?: '4.2-SNAPSHOT'
+  interlokCoreVersion = project.findProperty('interlokCoreVersion') ?: '4.3-SNAPSHOT'
+  releaseVersion = project.findProperty('releaseVersion') ?: '4.3-SNAPSHOT'
   nexusBaseUrl = project.findProperty('nexusBaseUrl') ?: 'https://nexus.adaptris.net/nexus'
   mavenPublishUrl = project.findProperty('mavenPublishUrl') ?: nexusBaseUrl + '/content/repositories/snapshots'
   javadocsBaseUrl = nexusBaseUrl + "/content/sites/javadocs/com/adaptris"
@@ -23,7 +23,7 @@ ext {
   organizationName = "Adaptris Ltd"
 
   slf4jVersion = '1.7.32'
-  mockitoVersion = '3.11.2'
+  mockitoVersion = '4.0.0'
   log4j2Version = '2.14.1'
 }
 
@@ -105,7 +105,7 @@ subprojects {
   group   = 'com.adaptris'
   version = releaseVersion
   def versionDir = "$buildDir/version"
-  generateLombokConfig.enabled = false
+  lombok.disableConfig = true
 
   // In this section you declare where to find the dependencies of your project
   repositories {
@@ -162,7 +162,7 @@ subprojects {
     testImplementation ("com.adaptris:interlok-stubs:$interlokCoreVersion") { changing=true }
     testImplementation ("org.mockito:mockito-core:$mockitoVersion")
     testImplementation ("org.mockito:mockito-inline:$mockitoVersion")
-    testImplementation ("org.awaitility:awaitility:4.1.0")
+    testImplementation ("org.awaitility:awaitility:4.1.1")
     // INTERLOK-3233 we still need log4j since we're doing MDC stuffs.
     testImplementation ("org.apache.logging.log4j:log4j-core:$log4j2Version")
     testImplementation ("org.apache.logging.log4j:log4j-api:$log4j2Version")

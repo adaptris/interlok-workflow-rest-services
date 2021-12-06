@@ -1,52 +1,67 @@
-package com.adaptris.rest;
+package com.adaptris.rest.metrics.datadog;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.adaptris.core.AdaptrisMessage;
-import com.adaptris.core.DefaultMessageFactory;
+
 import com.adaptris.rest.metrics.MetricBinder;
 import com.adaptris.rest.metrics.MetricProviders;
+
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 
-public class PrometheusEndpointComponentTest {
+public class DatadogPushComponentTest {
 
-  private PrometheusEndpointComponent component;
-
-  private AdaptrisMessage message;
-
-  private MockWorkflowConsumer mockConsumer;
+  private DatadogPushComponent component;
+  
+  private Properties properties;
 
   @Before
   public void setUp() throws Exception {
-    mockConsumer = new MockWorkflowConsumer();
-
-    component = new PrometheusEndpointComponent();
-    component.setConsumer(mockConsumer);
-    component.init(new Properties());
-    component.start();
-    message = DefaultMessageFactory.getDefaultInstance().newMessage();
+    properties = new Properties();
+    properties.put("datadogPushTimerSeconds", "1");
+    properties.put("datadogUrlKey", "http://localhost:5000");
+    properties.put("datadogApiKey", "my-api-key");
+    
+    component = new DatadogPushComponent();
+    component.init(properties);
   }
 
   @After
   public void tearDown() throws Exception {
-    component.stop();
     component.destroy();
-
   }
 
   @Test
+  public void testDefaultsNoApiKey() throws Exception {
+    try {
+      component.init(new Properties());
+      fail("No API key, exception expected.");
+    } catch (Exception ex) {
+      //expected
+    }
+  }
+  
+  @Test
+  public void testDefaultsWithApiKey() throws Exception {
+    properties = new Properties();
+    properties.put("datadogApiKey", "my-api-key");
+    
+    component.init(properties);
+  }
+  
+  @Test
   public void testNoMetrics() throws Exception {
-    component.onAdaptrisMessage(message);
-
-    assertFalse(mockConsumer.isError);
-    assertTrue(mockConsumer.payload.equals(""));
+    component.start();
+    Thread.sleep(1500);
+    component.stop();
+    
+    assertEquals(0, component.getDatadogRegistry().getMeters().size());
   }
 
   @Test
@@ -54,28 +69,22 @@ public class PrometheusEndpointComponentTest {
     MetricProviders.getProviders().clear();
     MetricProviders.getProviders().add(new MockMetricProvider());
 
-    component.onAdaptrisMessage(message);
-
-    assertFalse(mockConsumer.isError);
-    assertTrue(mockConsumer.payload.contains("test_metric"));
+    component.start();
+    Thread.sleep(1500);
+    component.stop();
+    
+    assertEquals(1, component.getDatadogRegistry().getMeters().size());
   }
 
   @Test
-  public void testErrorResponseOnMetricGenerationException() throws Exception {
+  public void testErrorOnMetricBind() throws Exception {
     MetricProviders.getProviders().clear();
     MetricProviders.getProviders().add(new MockFailingMetricProvider());
-    component.onAdaptrisMessage(message);
-
-    assertFalse(mockConsumer.isError);
-    assertTrue(mockConsumer.payload.isEmpty());
-  }
-
-  @Test
-  public void testErrorResponse() throws Exception {
-    component.onAdaptrisMessage(null);
-
-    assertTrue(mockConsumer.isError);
-    assertTrue(mockConsumer.httpStatus == 500);
+    component.start();
+    Thread.sleep(1500);
+    component.stop();
+    
+    assertEquals(0, component.getDatadogRegistry().getMeters().size());
   }
 
   @Test

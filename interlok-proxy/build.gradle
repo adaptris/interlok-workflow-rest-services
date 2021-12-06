@@ -1,25 +1,19 @@
 ext {
-  componentName='Interlok Management/REST: JVM Metrics'
-  componentDesc="Collecting JVM metrics and exposing them via a REST endpoint"
+  componentName = 'Interlok Management/Proxy'
+  componentDesc="Proxy another HTTP(s) endpoint"
   delombokTargetDir = new File("${project.projectDir}/src/main/generated")
 }
 
 dependencies {
-	api project(':interlok-rest-base')
-	api ('io.micrometer:micrometer-core:1.7.5')
-	api ('io.github.mweirauch:micrometer-jvm-extras:0.2.2')
-
-	testImplementation project(':interlok-rest-base').sourceSets.test.output
+  // The only thing we're actually using is AbstractRestfulEndpoint#MDC_KEY (should we bother?)
+	// api project(':interlok-rest-base')
+  implementation ("org.apache.httpcomponents.client5:httpclient5:5.1.1")
+  testImplementation ("io.undertow:undertow-core:2.2.12.Final")
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
-}
-
-task examplesJar(type: Jar, dependsOn: test) {
-    classifier = 'examples'
-    from new File(buildDir, '/examples')
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -39,7 +33,6 @@ jar {
 }
 artifacts {
     archives javadocJar
-    archives examplesJar
     archives sourcesJar
 }
 
@@ -49,16 +42,16 @@ publishing {
           from components.java
 
           artifact javadocJar { classifier "javadoc" }
-          artifact examplesJar { classifier "examples" }
           artifact sourcesJar { classifier "sources" }
           pom.withXml {
             asNode().appendNode("name", componentName)
             asNode().appendNode("description", componentDesc)
             def properties = asNode().appendNode("properties")
-            properties.appendNode("target", "4.0.0+")
-            properties.appendNode("tags", "rest,metrics,jvm")
+            properties.appendNode("target", "4.3.0+")
+            properties.appendNode("tags", "rest,proxy")
             properties.appendNode("license", "false")
             properties.appendNode("repository", "https://github.com/adaptris/interlok-workflow-rest-services")
+            properties.appendNode("readme", "https://github.com/adaptris/interlok-workflow-rest-services/raw/develop/interlok-proxy/README.md")
           }
       }
   }

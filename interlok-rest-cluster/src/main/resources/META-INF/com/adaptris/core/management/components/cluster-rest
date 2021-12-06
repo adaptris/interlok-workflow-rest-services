@@ -1,1 +1,1 @@
-class=com.adaptris.rest.ClusterManagerComponent
+class=com.adaptris.rest.cluster.ClusterManagerComponent

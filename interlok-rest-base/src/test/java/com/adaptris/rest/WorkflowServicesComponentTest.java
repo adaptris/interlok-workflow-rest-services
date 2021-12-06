@@ -3,6 +3,7 @@ package com.adaptris.rest;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -60,7 +61,7 @@ public class WorkflowServicesComponentTest {
 
   @Before
   public void setUp() throws Exception {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     
     message = DefaultMessageFactory.getDefaultInstance().newMessage();
     returnedMessage = DefaultMessageFactory.getDefaultInstance().newMessage();
@@ -92,7 +93,7 @@ public class WorkflowServicesComponentTest {
     workflowServicesComponent.onAdaptrisMessage(message);
     
     verify(mockJmxClient).process(any(), any());
-    verify(mockConsumer).doResponse(any(), any());
+    verify(mockConsumer).doResponse(any(AdaptrisMessage.class), any(AdaptrisMessage.class), anyString(), anyInt());
   }
 
   @Test

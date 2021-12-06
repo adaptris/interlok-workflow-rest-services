@@ -1,1 +1,1 @@
-class=com.adaptris.rest.DatadogPushComponent
+class=com.adaptris.rest.metrics.datadog.DatadogPushComponent
