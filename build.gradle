@@ -4,7 +4,7 @@ import org.apache.tools.ant.filters.*
 plugins {
   id 'com.github.spotbugs' version '5.0.3' apply false
   id "io.freefair.lombok" version "6.3.0" apply false
-  id 'org.owasp.dependencycheck' version '6.5.2.1' apply false
+  id 'org.owasp.dependencycheck' version '6.5.3' apply false
 }
 
 ext {
