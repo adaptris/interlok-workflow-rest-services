@@ -8,7 +8,7 @@ dependencies {
   // The only thing we're actually using is AbstractRestfulEndpoint#MDC_KEY (should we bother?)
 	// api project(':interlok-rest-base')
   implementation ("org.apache.httpcomponents.client5:httpclient5:5.1.2")
-  testImplementation ("io.undertow:undertow-core:2.2.14.Final")
+  testImplementation ("io.undertow:undertow-core:2.2.15.Final")
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
