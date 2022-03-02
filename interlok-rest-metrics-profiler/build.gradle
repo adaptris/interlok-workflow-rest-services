@@ -11,7 +11,7 @@ dependencies {
 
 	testImplementation project(':interlok-rest-base').sourceSets.test.output
 	testImplementation ("com.adaptris:interlok-profiler:$interlokCoreVersion") { changing = true}
-	testImplementation ('io.micrometer:micrometer-registry-prometheus:1.8.0')
+	testImplementation ('io.micrometer:micrometer-registry-prometheus:1.8.2')
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
@@ -56,6 +56,7 @@ publishing {
           pom.withXml {
             asNode().appendNode("name", componentName)
             asNode().appendNode("description", componentDesc)
+			asNode().appendNode("url", "https://interlok.adaptris.net/interlok-docs/#/")
             def properties = asNode().appendNode("properties")
             properties.appendNode("target", "4.0.0+")
             properties.appendNode("tags", "rest,profiler,metrics")
