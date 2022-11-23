@@ -6,7 +6,7 @@ ext {
 
 dependencies {
 	api project(':interlok-rest-base')
-	api ('io.micrometer:micrometer-core:1.9.5')
+	api ('io.micrometer:micrometer-core:1.10.2')
 	api ('io.github.mweirauch:micrometer-jvm-extras:0.2.2')
 
 	testImplementation project(':interlok-rest-base').sourceSets.test.output
