@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
@@ -105,13 +106,16 @@ public class ClusterManagerComponentTest {
       .pollInterval(Durations.ONE_HUNDRED_MILLISECONDS)
       .until(testConsumer::complete);
 
-    @SuppressWarnings("unchecked")
-    List<ClusterInstance> instances = (List<ClusterInstance>) new XStreamJsonMarshaller().unmarshal(testConsumer.getPayload());
-
+    List<?> instances = (List<?>) new XStreamJsonMarshaller().unmarshal(testConsumer.getPayload());
     assertTrue(instances.size() == 1);
-    assertTrue(instances.get(0).getUniqueId().equals(clusterInstanceOne.getUniqueId()));
-    assertTrue(instances.get(0).getClusterUuid().equals(clusterInstanceOne.getClusterUuid()));
-    assertTrue(instances.get(0).getJmxAddress().equals(clusterInstanceOne.getJmxAddress()));
+    
+    @SuppressWarnings("rawtypes")
+	ArrayList instancesList = (ArrayList) instances.get(0);
+    ClusterInstance clusterInstance = (ClusterInstance) instancesList.get(0);
+    
+    assertTrue(clusterInstance.getUniqueId().equals(clusterInstanceOne.getUniqueId()));
+    assertTrue(clusterInstance.getClusterUuid().equals(clusterInstanceOne.getClusterUuid()));
+    assertTrue(clusterInstance.getJmxAddress().equals(clusterInstanceOne.getJmxAddress()));
   }
 
   @Test
@@ -127,17 +131,21 @@ public class ClusterManagerComponentTest {
       .pollInterval(Durations.ONE_HUNDRED_MILLISECONDS)
       .until(testConsumer::complete);
 
-    @SuppressWarnings("unchecked")
-    List<ClusterInstance> instances = (List<ClusterInstance>) new XStreamJsonMarshaller().unmarshal(testConsumer.getPayload());
+    List<?> instances = (List<?>) new XStreamJsonMarshaller().unmarshal(testConsumer.getPayload());
+    
+    @SuppressWarnings("rawtypes")
+	ArrayList instancesList = (ArrayList) instances.get(0);
+    assertTrue(instancesList.size() == 2);
+    
+    ClusterInstance clusterInstance = (ClusterInstance) instancesList.get(0);
+    assertTrue(clusterInstance.getUniqueId().equals(clusterInstanceOne.getUniqueId()));
+    assertTrue(clusterInstance.getClusterUuid().equals(clusterInstanceOne.getClusterUuid()));
+    assertTrue(clusterInstance.getJmxAddress().equals(clusterInstanceOne.getJmxAddress()));
 
-    assertTrue(instances.size() == 2);
-    assertTrue(instances.get(0).getUniqueId().equals(clusterInstanceOne.getUniqueId()));
-    assertTrue(instances.get(0).getClusterUuid().equals(clusterInstanceOne.getClusterUuid()));
-    assertTrue(instances.get(0).getJmxAddress().equals(clusterInstanceOne.getJmxAddress()));
-
-    assertTrue(instances.get(1).getUniqueId().equals(clusterInstanceTwo.getUniqueId()));
-    assertTrue(instances.get(1).getClusterUuid().equals(clusterInstanceTwo.getClusterUuid()));
-    assertTrue(instances.get(1).getJmxAddress().equals(clusterInstanceTwo.getJmxAddress()));
+    ClusterInstance clusterInstance1 = (ClusterInstance) instancesList.get(1);    
+    assertTrue(clusterInstance1.getUniqueId().equals(clusterInstanceTwo.getUniqueId()));
+    assertTrue(clusterInstance1.getClusterUuid().equals(clusterInstanceTwo.getClusterUuid()));
+    assertTrue(clusterInstance1.getJmxAddress().equals(clusterInstanceTwo.getJmxAddress()));
   }
 
   @Test
