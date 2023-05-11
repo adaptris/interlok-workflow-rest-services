@@ -183,7 +183,6 @@ subprojects {
       options.linksOffline(interlokCommonJavadocs, offlineJavadocPackageDir.getCanonicalPath() + "/interlok-common-$interlokCoreVersion-javadoc.jar")
       taglets = ["com.adaptris.taglet.ConfigTaglet", "com.adaptris.taglet.LicenseTaglet"]
       options.addStringOption "tagletpath", configurations.javadoc.asPath
-	    options.addBooleanOption "-no-module-directories", true
       options.addStringOption('Xdoclint:none', '-quiet')
     }
   }
@@ -205,7 +204,6 @@ subprojects {
       options.linksOffline(interlokCommonJavadocs, offlineJavadocPackageDir.getCanonicalPath() + "/interlok-common-$interlokCoreVersion-javadoc.jar")
       taglets = ["com.adaptris.taglet.ConfigTaglet", "com.adaptris.taglet.LicenseTaglet"]
       options.addStringOption "tagletpath", configurations.javadoc.asPath
-	    options.addBooleanOption "-no-module-directories", true
       options.addStringOption('Xdoclint:none', '-quiet')
       options.docletpath = configurations.umlDoclet.files.asType(List)
       options.doclet = "nl.talsmasoftware.umldoclet.UMLDoclet"
