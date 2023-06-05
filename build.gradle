@@ -340,5 +340,4 @@ subprojects {
 
   check.dependsOn jacocoTestReport
   javadoc.dependsOn offlinePackageList, umlJavadoc
-
 }
