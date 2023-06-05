@@ -1,12 +1,15 @@
 package com.adaptris.rest.util;
 
 import java.util.Set;
+
 import javax.management.JMX;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
+
 import com.adaptris.core.util.JmxHelper;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,7 +36,7 @@ public class JmxMBeanHelper {
   public <T> T proxyMBean(String objectNameString, Class<T> type) throws MalformedObjectNameException {
     return proxyMBean(new ObjectName(objectNameString), type);
   }
-  
+
   public <T> T proxyMBean(ObjectName objectName, Class<T> type) {
     return JMX.newMBeanProxy(mBeanServer(), objectName, type, true);
   }
@@ -46,16 +49,17 @@ public class JmxMBeanHelper {
   public Set<ObjectInstance> getMBeans(String objectNameQuery) throws Exception {
     return mBeanServer().queryMBeans(new ObjectName(objectNameQuery), null);
   }
-  
+
   public Set<ObjectName> getMBeanNames(String objectNameQuery) throws Exception {
     return mBeanServer().queryNames(new ObjectName(objectNameQuery), null);
   }
 
   @Synchronized("mbeanLock")
   protected MBeanServer mBeanServer() {
-    if(getMBeanServer() == null)
+    if (getMBeanServer() == null)
       setMBeanServer(JmxHelper.findMBeanServer());
 
     return getMBeanServer();
   }
+
 }

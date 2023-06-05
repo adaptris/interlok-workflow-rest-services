@@ -20,17 +20,16 @@ public class MockWorkflowConsumer extends WorkflowServicesConsumer {
   private int httpStatus = -1;
 
   @Override
-  protected StandaloneConsumer configureConsumer(AdaptrisMessageListener messageListener, String consumedUrlPath, String acceptedHttpMethods) {
+  protected StandaloneConsumer configureConsumer(AdaptrisMessageListener messageListener, String consumedUrlPath,
+      String acceptedHttpMethods) {
     return null;
   }
 
   @Override
-  protected void doResponse(AdaptrisMessage originalMessage, AdaptrisMessage processedMessage,
-      String contentType, int status) {
+  protected void doResponse(AdaptrisMessage originalMessage, AdaptrisMessage processedMessage, String contentType, int status) {
     payload = processedMessage.getContent();
     httpStatus = status;
   }
-
 
   @Override
   public void doErrorResponse(AdaptrisMessage message, Exception e, int status) {
@@ -39,11 +38,11 @@ public class MockWorkflowConsumer extends WorkflowServicesConsumer {
   }
 
   public boolean complete() {
-    return isError == true || payload != null;
+    return isError || payload != null;
   }
 
   @Override
   public void prepare() {
-
   }
+
 }

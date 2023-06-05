@@ -1,9 +1,10 @@
 package com.adaptris.rest.healthcheck;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -22,7 +23,7 @@ import javax.management.ObjectName;
 
 import org.apache.commons.lang3.StringUtils;
 import org.awaitility.Durations;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -54,7 +55,7 @@ public class WorkflowHealthCheckComponentTest {
   private static final String WORKFLOW_OBJECT_NAME_2 = "com.adaptris:type=Channel,adapter=" + ADAPTER_ID + ",channel=" + CHANNEL_ID + ",id=" + WORKFLOW_ID2;
   private static final String PATH_KEY = JettyConstants.JETTY_URI;
 
-  @Test(expected = CoreException.class)
+  @Test
   public void testMarshalling() throws Exception {
     List<AdapterState> states = new ArrayList<>();
     WorkflowHealthCheckComponent healthCheck = new WorkflowHealthCheckComponent();
@@ -64,7 +65,7 @@ public class WorkflowHealthCheckComponentTest {
     doThrow(new CoreException("Expected")).when(mockMarshaller).marshal(any());
     healthCheck.setMarshaller(mockMarshaller);
 
-    healthCheck.toString(states);
+    assertThrows(CoreException.class, () -> healthCheck.toString(states));
   }
 
   @Test
@@ -80,8 +81,7 @@ public class WorkflowHealthCheckComponentTest {
       wrapper.start();
       wrapper.healthCheck().onAdaptrisMessage(message);
 
-      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS)
-          .until(testConsumer::complete);
+      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS).until(testConsumer::complete);
 
       assertFalse(testConsumer.isError);
     } finally {
@@ -102,8 +102,7 @@ public class WorkflowHealthCheckComponentTest {
       wrapper.start();
       wrapper.healthCheck().onAdaptrisMessage(message);
 
-      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS)
-          .until(testConsumer::complete);
+      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS).until(testConsumer::complete);
 
       assertTrue(testConsumer.isError);
       assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, testConsumer.httpStatus);
@@ -120,15 +119,13 @@ public class WorkflowHealthCheckComponentTest {
     JmxMBeanHelper mockJmxHelper = wrapper.jmxHelper();
     TestConsumer testConsumer = wrapper.testConsumer();
 
-    doThrow(new Exception("Expected"))
-        .when(mockJmxHelper).getStringAttribute(anyString(), any());
+    doThrow(new Exception("Expected")).when(mockJmxHelper).getStringAttribute(anyString(), any());
 
     try {
       wrapper.start();
       wrapper.healthCheck().onAdaptrisMessage(message);
 
-      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS)
-          .until(testConsumer::complete);
+      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS).until(testConsumer::complete);
 
       assertTrue(testConsumer.isError);
       assertEquals(HttpURLConnection.HTTP_INTERNAL_ERROR, testConsumer.httpStatus);
@@ -137,7 +134,6 @@ public class WorkflowHealthCheckComponentTest {
       wrapper.destroy();
     }
   }
-
 
   @Test
   public void testHealthCheck_AllStarted() throws Exception {
@@ -149,8 +145,7 @@ public class WorkflowHealthCheckComponentTest {
       wrapper.start();
       wrapper.healthCheck().onAdaptrisMessage(message);
 
-      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS)
-          .until(testConsumer::complete);
+      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS).until(testConsumer::complete);
       assertFalse(testConsumer.isError);
       assertTrue(testConsumer.payload.contains(ADAPTER_ID));
       assertTrue(testConsumer.payload.contains(CHANNEL_ID));
@@ -171,8 +166,7 @@ public class WorkflowHealthCheckComponentTest {
       wrapper.start();
       wrapper.healthCheck().onAdaptrisMessage(message);
 
-      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS)
-          .until(testConsumer::complete);
+      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS).until(testConsumer::complete);
       assertFalse(testConsumer.isError);
       assertTrue(testConsumer.payload.contains(ADAPTER_ID));
       assertTrue(testConsumer.payload.contains(CHANNEL_ID));
@@ -193,8 +187,7 @@ public class WorkflowHealthCheckComponentTest {
       wrapper.start();
       wrapper.healthCheck().onAdaptrisMessage(message);
 
-      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS)
-          .until(testConsumer::complete);
+      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS).until(testConsumer::complete);
       assertFalse(testConsumer.isError);
       assertEquals("", testConsumer.payload);
     } finally {
@@ -212,8 +205,7 @@ public class WorkflowHealthCheckComponentTest {
       wrapper.start();
       wrapper.healthCheck().onAdaptrisMessage(message);
 
-      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS)
-          .until(testConsumer::complete);
+      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS).until(testConsumer::complete);
       assertFalse(testConsumer.isError);
       assertTrue(testConsumer.payload.contains("is not started"));
       assertEquals(HttpURLConnection.HTTP_UNAVAILABLE, testConsumer.httpStatus);
@@ -232,8 +224,7 @@ public class WorkflowHealthCheckComponentTest {
       wrapper.start();
       wrapper.healthCheck().onAdaptrisMessage(message);
 
-      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS)
-          .until(testConsumer::complete);
+      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS).until(testConsumer::complete);
       assertEquals(HttpURLConnection.HTTP_OK, testConsumer.httpStatus);
       assertFalse(testConsumer.isError);
       assertEquals("", testConsumer.payload);
@@ -242,7 +233,7 @@ public class WorkflowHealthCheckComponentTest {
     }
   }
 
-  // Can't do this in @Before / @After since I want to control the mocking behaviour.
+  // Can't do this in @BeforeEach / @AfterEach since I want to control the mocking behaviour.
   private class MockedHealthCheckWrapper {
 
     private WorkflowHealthCheckComponent healthCheck;
@@ -257,8 +248,7 @@ public class WorkflowHealthCheckComponentTest {
 
     public MockedHealthCheckWrapper build(boolean workflowsAreStarted) throws Exception {
       ObjectName adapterObjectName = new ObjectName("com.adaptris:type=Adapter,id=" + ADAPTER_ID);
-      ObjectInstance adapter =
-          new ObjectInstance(adapterObjectName, AdapterManager.class.getName());
+      ObjectInstance adapter = new ObjectInstance(adapterObjectName, AdapterManager.class.getName());
       Set<ObjectInstance> adapterInstances = new HashSet<>();
       adapterInstances.add(adapter);
 
@@ -272,37 +262,28 @@ public class WorkflowHealthCheckComponentTest {
       workflowObjectNames.add(workflowObjectName1);
       workflowObjectNames.add(workflowObjectName2);
 
-
       when(mockJmxHelper.getMBeans(anyString())).thenReturn(adapterInstances);
-      when(mockJmxHelper.getStringAttribute(adapterObjectName.toString(), UNIQUE_ID))
-          .thenReturn(ADAPTER_ID);
+      when(mockJmxHelper.getStringAttribute(adapterObjectName.toString(), UNIQUE_ID)).thenReturn(ADAPTER_ID);
       when(mockJmxHelper.getStringAttributeClassName(adapterObjectName.toString(), COMPONENT_STATE))
           .thenReturn(StartedState.class.getSimpleName());
 
-      when(mockJmxHelper.getObjectSetAttribute(adapterObjectName.toString(), CHILDREN_ATTRIBUTE))
-          .thenReturn(channelObjectNames);
-      when(mockJmxHelper.getStringAttribute(channelObjectName.toString(), UNIQUE_ID))
-          .thenReturn(CHANNEL_ID);
+      when(mockJmxHelper.getObjectSetAttribute(adapterObjectName.toString(), CHILDREN_ATTRIBUTE)).thenReturn(channelObjectNames);
+      when(mockJmxHelper.getStringAttribute(channelObjectName.toString(), UNIQUE_ID)).thenReturn(CHANNEL_ID);
       when(mockJmxHelper.getStringAttributeClassName(channelObjectName.toString(), COMPONENT_STATE))
           .thenReturn(StartedState.class.getSimpleName());
 
-      when(mockJmxHelper.getObjectSetAttribute(channelObjectName.toString(), CHILDREN_ATTRIBUTE))
-          .thenReturn(workflowObjectNames);
+      when(mockJmxHelper.getObjectSetAttribute(channelObjectName.toString(), CHILDREN_ATTRIBUTE)).thenReturn(workflowObjectNames);
 
       String workflowState = StartedState.class.getSimpleName();
       if (!workflowsAreStarted) {
         workflowState = StoppedState.class.getSimpleName();
       }
 
-      when(mockJmxHelper.getStringAttribute(workflowObjectName1.toString(), UNIQUE_ID))
-          .thenReturn(WORKFLOW_ID1);
-      when(mockJmxHelper.getStringAttributeClassName(workflowObjectName1.toString(),
-          COMPONENT_STATE)).thenReturn(workflowState);
+      when(mockJmxHelper.getStringAttribute(workflowObjectName1.toString(), UNIQUE_ID)).thenReturn(WORKFLOW_ID1);
+      when(mockJmxHelper.getStringAttributeClassName(workflowObjectName1.toString(), COMPONENT_STATE)).thenReturn(workflowState);
 
-      when(mockJmxHelper.getStringAttribute(workflowObjectName2.toString(), UNIQUE_ID))
-          .thenReturn(WORKFLOW_ID2);
-      when(mockJmxHelper.getStringAttributeClassName(workflowObjectName2.toString(),
-            COMPONENT_STATE)).thenReturn(workflowState);
+      when(mockJmxHelper.getStringAttribute(workflowObjectName2.toString(), UNIQUE_ID)).thenReturn(WORKFLOW_ID2);
+      when(mockJmxHelper.getStringAttributeClassName(workflowObjectName2.toString(), COMPONENT_STATE)).thenReturn(workflowState);
 
       healthCheck = new WorkflowHealthCheckComponent();
       testConsumer = new TestConsumer();
@@ -310,7 +291,6 @@ public class WorkflowHealthCheckComponentTest {
       healthCheck.setJmxMBeanHelper(mockJmxHelper);
       return this;
     }
-
 
     public void start() throws Exception {
       healthCheck.init(new Properties());
@@ -345,17 +325,16 @@ public class WorkflowHealthCheckComponentTest {
     int httpStatus = -1;
 
     @Override
-    protected StandaloneConsumer configureConsumer(AdaptrisMessageListener messageListener, String consumedUrlPath, String acceptedHttpMethods) {
+    protected StandaloneConsumer configureConsumer(AdaptrisMessageListener messageListener, String consumedUrlPath,
+        String acceptedHttpMethods) {
       return null;
     }
 
     @Override
-    protected void doResponse(AdaptrisMessage originalMessage, AdaptrisMessage processedMessage,
-        String contentType, int status) {
+    protected void doResponse(AdaptrisMessage originalMessage, AdaptrisMessage processedMessage, String contentType, int status) {
       payload = processedMessage.getContent();
       httpStatus = status;
     }
-
 
     @Override
     public void doErrorResponse(AdaptrisMessage message, Exception e, int status) {
@@ -365,7 +344,7 @@ public class WorkflowHealthCheckComponentTest {
     }
 
     public boolean complete() {
-      return isError == true || payload != null;
+      return isError || payload != null;
     }
 
     @Override

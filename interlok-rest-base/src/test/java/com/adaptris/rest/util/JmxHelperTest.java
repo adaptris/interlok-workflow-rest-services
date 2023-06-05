@@ -1,13 +1,16 @@
 package com.adaptris.rest.util;
 
 import static com.adaptris.rest.util.DummyMBean.DUMMY_MBEAN_BASE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.util.Set;
+
 import javax.management.MBeanServer;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 public class JmxHelperTest {
 
@@ -88,7 +91,7 @@ public class JmxHelperTest {
       server.unregisterMBean(ObjectName.getInstance(objectRef));
     }
   }
-  
+
   @Test
   public void testGetMBeanNames() throws Exception {
     JmxMBeanHelper helper = new JmxMBeanHelper();

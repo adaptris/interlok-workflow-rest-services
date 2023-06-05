@@ -8,12 +8,15 @@ import static interlok.management.proxy.Config.LOGGING_CONTEXT;
 import static interlok.management.proxy.Config.LOGGING_CONTEXT_REF;
 import static interlok.management.proxy.Helper.configureRequest;
 import static interlok.management.proxy.Helper.doResponse;
+
 import java.util.Optional;
 import java.util.function.Consumer;
+
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.slf4j.MDC;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageListener;
 import com.adaptris.core.CoreException;
@@ -21,6 +24,7 @@ import com.adaptris.core.StandaloneConsumer;
 import com.adaptris.core.http.jetty.EmbeddedConnection;
 import com.adaptris.core.http.jetty.JettyResponseService;
 import com.adaptris.core.util.LifecycleHelper;
+
 import interlok.management.proxy.Helper.HttpResponseInfo;
 import interlok.management.proxy.Helper.ResponseToMessage;
 import lombok.AccessLevel;
@@ -64,8 +68,7 @@ public class ProxyWorker extends StandaloneConsumer implements AdaptrisMessageLi
   }
 
   @Override
-  public void onAdaptrisMessage(AdaptrisMessage msg, Consumer<AdaptrisMessage> onSuccess,
-      Consumer<AdaptrisMessage> onFailure) {
+  public void onAdaptrisMessage(AdaptrisMessage msg, Consumer<AdaptrisMessage> onSuccess, Consumer<AdaptrisMessage> onFailure) {
     MDC.put(LOGGING_CONTEXT, friendlyName());
     try {
       // Figure out if there's ?param=value

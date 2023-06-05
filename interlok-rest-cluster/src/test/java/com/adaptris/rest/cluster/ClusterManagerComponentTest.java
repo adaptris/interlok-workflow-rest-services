@@ -1,8 +1,8 @@
 package com.adaptris.rest.cluster;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -14,9 +14,9 @@ import java.util.UUID;
 import javax.management.MalformedObjectNameException;
 
 import org.awaitility.Durations;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -49,7 +49,7 @@ public class ClusterManagerComponentTest {
 
   @Mock private ClusterManagerMBean mockClusterManagerMBean;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     MockitoAnnotations.openMocks(this);
 
@@ -74,7 +74,7 @@ public class ClusterManagerComponentTest {
         .thenReturn(expiringMapCache);
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception {
     clusterManagerComponent.stop();
     clusterManagerComponent.destroy();
@@ -163,4 +163,5 @@ public class ClusterManagerComponentTest {
 
     assertTrue(testConsumer.isError());
   }
+  
 }

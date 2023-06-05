@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import com.adaptris.core.StandaloneConsumer;
 
 public class ProxyComponentTest {

@@ -22,7 +22,6 @@ ext {
 
   organizationName = "Adaptris Ltd"
 
-  slf4jVersion = '1.7.32'
   mockitoVersion = '4.9.0'
   log4j2Version = '2.20.0'
 }
@@ -72,7 +71,6 @@ def propertyTemplate(dir, filename) {
   return filename
 }
 
-
 task clean(type: Delete) {
   delete project.buildDir
 }
@@ -100,8 +98,8 @@ subprojects {
   apply plugin: 'com.github.spotbugs'
   apply plugin: 'org.owasp.dependencycheck'
 
-  sourceCompatibility = JavaVersion.VERSION_11
-  targetCompatibility = JavaVersion.VERSION_11
+  sourceCompatibility = JavaVersion.VERSION_17
+  targetCompatibility = JavaVersion.VERSION_17
   group   = 'com.adaptris'
   version = releaseVersion
   def versionDir = "$buildDir/version"
@@ -158,7 +156,7 @@ subprojects {
     annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion")
     umlDoclet("nl.talsmasoftware:umldoclet:1.1.4")
 
-    testImplementation ('junit:junit:4.13.2')
+    testImplementation ("org.junit.jupiter:junit-jupiter-engine:5.9.3")
     testImplementation ("com.adaptris:interlok-stubs:$interlokCoreVersion") { changing=true }
     testImplementation ("org.mockito:mockito-core:$mockitoVersion")
     testImplementation ("org.mockito:mockito-inline:$mockitoVersion")
@@ -226,10 +224,10 @@ subprojects {
   }
 
   jacocoTestReport {
-      reports {
-          xml.required= true
-          html.required= true
-      }
+    reports {
+      xml.required= true
+      html.required= true
+    }
   }
 
   sourceSets {
@@ -311,9 +309,6 @@ subprojects {
     }
   }
 
-  // disable spotbugsTests which checks our test code..
-  spotbugsTest.enabled = false
-
   dependencyCheck  {
     suppressionFiles= [ "https://raw.githubusercontent.com/adaptris/interlok/develop/gradle/owasp-exclude.xml" ]
     scanConfigurations = [ "api", "compileClasspath", "runtimeClasspath" ]
@@ -334,6 +329,14 @@ subprojects {
     destinationDirectory= sourceSets.main.java.classesDirectory
     classpath = project.sourceSets.main.compileClasspath
   }
+
+  test {
+    jvmArgs = ['--add-opens', 'java.base/java.lang=ALL-UNNAMED', '--add-opens', 'java.base/java.util=ALL-UNNAMED']
+    useJUnitPlatform()
+  }
+
+  // disable spotbugsTests which checks our test code..
+  spotbugsTest.enabled = false
 
   check.dependsOn jacocoTestReport
   javadoc.dependsOn offlinePackageList, umlJavadoc

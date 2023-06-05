@@ -1,6 +1,7 @@
 package com.adaptris.rest.util;
 
 import java.util.Set;
+
 import javax.management.ObjectName;
 
 public interface DummyMBean {
@@ -11,4 +12,5 @@ public interface DummyMBean {
   String getUniqueId();
 
   Set<ObjectName> getChildren();
+
 }

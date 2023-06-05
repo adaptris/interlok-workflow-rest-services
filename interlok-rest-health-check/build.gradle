@@ -5,22 +5,22 @@ ext {
 }
 
 dependencies {
-	api project(':interlok-rest-base')
+  api project(':interlok-rest-base')
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
+  classifier = 'javadoc'
+  from javadoc.destinationDir
 }
 
 task examplesJar(type: Jar, dependsOn: test) {
-    classifier = 'examples'
-    from new File(buildDir, '/examples')
+  classifier = 'examples'
+  from new File(buildDir, '/examples')
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.extensions.delombokTask
+  classifier = 'sources'
+  from sourceSets.main.extensions.delombokTask
 }
 
 jar {
@@ -34,29 +34,30 @@ jar {
   }
 }
 artifacts {
-    archives javadocJar
-    archives examplesJar
+  archives javadocJar
+  archives examplesJar
     archives sourcesJar
 }
 
 publishing {
   publications {
-      mavenJava(MavenPublication) {
-          from components.java
+    mavenJava(MavenPublication) {
+      from components.java
 
-          artifact javadocJar { classifier "javadoc" }
-          artifact examplesJar { classifier "examples" }
-          artifact sourcesJar { classifier "sources" }
-          pom.withXml {
-            asNode().appendNode("name", componentName)
-            asNode().appendNode("description", componentDesc)
-            def properties = asNode().appendNode("properties")
-            properties.appendNode("target", "3.8.3+")
-            properties.appendNode("tags", "rest,health,healthcheck")
-            properties.appendNode("license", "false")
-            properties.appendNode("repository", "https://github.com/adaptris/interlok-workflow-rest-services")
-          }
+      artifact javadocJar { classifier "javadoc" }
+      artifact examplesJar { classifier "examples" }
+      artifact sourcesJar { classifier "sources" }
+      pom.withXml {
+        asNode().appendNode("name", componentName)
+        asNode().appendNode("description", componentDesc)
+	    asNode().appendNode("url", "https://interlok.adaptris.net/interlok-docs/#/")
+        def properties = asNode().appendNode("properties")
+        properties.appendNode("target", "3.8.3+")
+        properties.appendNode("tags", "rest,health,healthcheck")
+        properties.appendNode("license", "false")
+        properties.appendNode("repository", "https://github.com/adaptris/interlok-workflow-rest-services")
       }
+    }
   }
   repositories {
     maven {
