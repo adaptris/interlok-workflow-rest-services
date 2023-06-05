@@ -3,7 +3,9 @@ package com.adaptris.rest.util;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
 import javax.management.ObjectName;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,4 +27,5 @@ public class Dummy implements DummyMBean {
     }
     setChildren(offspring);
   }
+
 }

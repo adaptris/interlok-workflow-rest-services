@@ -1,11 +1,13 @@
 package com.adaptris.rest.healthcheck;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 public class ChannelStateTest {
 
@@ -13,7 +15,7 @@ public class ChannelStateTest {
   public void testWithWorkflowStates() {
     ChannelState state = new ChannelState().withId("id").withState("state");
     assertNull(state.getWorkflowStates());
-    state.withWorkflowStates(new ArrayList());
+    state.withWorkflowStates(new ArrayList<>());
     assertNotNull(state.getWorkflowStates());
   }
 
@@ -27,4 +29,5 @@ public class ChannelStateTest {
     assertSame(s1, s2);
     assertNotNull(state.getWorkflowStates());
   }
+
 }

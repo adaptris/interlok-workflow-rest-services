@@ -6,13 +6,13 @@ import lombok.Setter;
 
 @NoArgsConstructor
 public abstract class State {
+
   @Getter
   @Setter
   private String id;
   @Getter
   @Setter
   private String state;
-
 
   @SuppressWarnings("unchecked")
   public <T extends State> T withId(String s) {
@@ -25,4 +25,5 @@ public abstract class State {
     setState(s);
     return (T) this;
   }
+
 }

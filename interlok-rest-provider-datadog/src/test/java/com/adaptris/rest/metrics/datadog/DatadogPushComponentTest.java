@@ -1,13 +1,13 @@
 package com.adaptris.rest.metrics.datadog;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Properties;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.adaptris.rest.metrics.MetricBinder;
 import com.adaptris.rest.metrics.MetricProviders;
@@ -18,21 +18,21 @@ import io.micrometer.core.instrument.MeterRegistry;
 public class DatadogPushComponentTest {
 
   private DatadogPushComponent component;
-  
+
   private Properties properties;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     properties = new Properties();
     properties.put("datadogPushTimerSeconds", "1");
     properties.put("datadogUrlKey", "http://localhost:5000");
     properties.put("datadogApiKey", "my-api-key");
-    
+
     component = new DatadogPushComponent();
     component.init(properties);
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception {
     component.destroy();
   }
@@ -43,24 +43,24 @@ public class DatadogPushComponentTest {
       component.init(new Properties());
       fail("No API key, exception expected.");
     } catch (Exception ex) {
-      //expected
+      // expected
     }
   }
-  
+
   @Test
   public void testDefaultsWithApiKey() throws Exception {
     properties = new Properties();
     properties.put("datadogApiKey", "my-api-key");
-    
+
     component.init(properties);
   }
-  
+
   @Test
   public void testNoMetrics() throws Exception {
     component.start();
     Thread.sleep(1500);
     component.stop();
-    
+
     assertEquals(0, component.getDatadogRegistry().getMeters().size());
   }
 
@@ -72,7 +72,7 @@ public class DatadogPushComponentTest {
     component.start();
     Thread.sleep(1500);
     component.stop();
-    
+
     assertEquals(1, component.getDatadogRegistry().getMeters().size());
   }
 
@@ -83,7 +83,7 @@ public class DatadogPushComponentTest {
     component.start();
     Thread.sleep(1500);
     component.stop();
-    
+
     assertEquals(0, component.getDatadogRegistry().getMeters().size());
   }
 
@@ -93,15 +93,12 @@ public class DatadogPushComponentTest {
     component.exceptionLogging(false, "hello", new Exception());
   }
 
-
   class MockMetricProvider implements MetricBinder {
     int value = 100;
 
     @Override
     public void bindTo(MeterRegistry registry) throws Exception {
-      Gauge.builder("test-metric", this, MockMetricProvider::getValue)
-          .description("A test metric.")
-          .register(registry);
+      Gauge.builder("test-metric", this, MockMetricProvider::getValue).description("A test metric.").register(registry);
     }
 
     public int getValue() {
@@ -116,4 +113,5 @@ public class DatadogPushComponentTest {
       throw new Exception("Expected");
     }
   }
+
 }

@@ -45,7 +45,7 @@ public class JvmMetricsGenerator extends MgmtComponentImpl implements MetricBind
       UptimeMetrics.class);
 
   private volatile boolean metricsRegistered;
-  
+
   public JvmMetricsGenerator() {
     this(Collections.emptyList());
   }
@@ -56,8 +56,8 @@ public class JvmMetricsGenerator extends MgmtComponentImpl implements MetricBind
 
   @Override
   public void bindTo(MeterRegistry registry) {
-    if(!metricsRegistered) {
-      meterBinders.forEach( binder -> {
+    if (!metricsRegistered) {
+      meterBinders.forEach(binder -> {
         try {
           log.trace("Generating metrics from meter: {}", binder.getSimpleName());
           binder.getDeclaredConstructor().newInstance().bindTo(registry);
@@ -68,11 +68,11 @@ public class JvmMetricsGenerator extends MgmtComponentImpl implements MetricBind
       metricsRegistered = true;
     }
   }
-  
+
   @Override
   public void init(Properties config) throws Exception {
     MetricProviders.addProvider(this);
-    
+
     metricsRegistered = false;
   }
 
@@ -87,4 +87,5 @@ public class JvmMetricsGenerator extends MgmtComponentImpl implements MetricBind
   @Override
   public void destroy() throws Exception {
   }
+
 }

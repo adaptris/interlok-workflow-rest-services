@@ -22,21 +22,20 @@ import lombok.Setter;
 @NoArgsConstructor
 public class DatadogPushComponent extends MgmtComponentImpl {
 
-  private static final transient boolean ADDITIONAL_DEBUG = BooleanUtils
-      .toBoolean(System.getProperty("interlok.datadog.debug", "false"));
-  
+  private static final transient boolean ADDITIONAL_DEBUG = BooleanUtils.toBoolean(System.getProperty("interlok.datadog.debug", "false"));
+
   private static final String DATADOG_API_KEY = "datadogApiKey";
-  
+
   private static final String DATADOG_URL_KEY = "datadogUrlKey";
-  
+
   private static final String DATADOG_URL_DEFAULT = "https://api.datadoghq.com";
-  
+
   private static final String DATADOG_PUSH_TIMER_SECONDS_KEY = "datadogPushTimerSeconds";
 
   private static final int PUSH_TIMER_SECONDS = 10;
 
   private ScheduledExecutorService executor;
-  
+
   @Getter
   @Setter
   private DatadogMeterRegistry datadogRegistry;
@@ -48,12 +47,12 @@ public class DatadogPushComponent extends MgmtComponentImpl {
       public Duration step() {
         return Duration.ofSeconds(pushTimerSeconds(config));
       }
-      
+
       @Override
       public String apiKey() {
         return config.getProperty(DATADOG_API_KEY);
       }
-      
+
       @Override
       public String uri() {
         return StringUtils.defaultIfBlank(config.getProperty(DATADOG_URL_KEY), DATADOG_URL_DEFAULT);
@@ -70,7 +69,7 @@ public class DatadogPushComponent extends MgmtComponentImpl {
   @Override
   public void start() throws Exception {
     executor = Executors.newSingleThreadScheduledExecutor();
-    
+
     Runnable runnableTask = () -> {
       MetricProviders.getProviders().forEach(provider -> {
         try {
@@ -100,7 +99,7 @@ public class DatadogPushComponent extends MgmtComponentImpl {
         Integer.parseInt(config.getProperty(DATADOG_PUSH_TIMER_SECONDS_KEY)) :
         PUSH_TIMER_SECONDS;
   }
-  
+
   // sad, this is for coverage.
   protected void exceptionLogging(boolean logging, String msg, Exception e) {
     if (logging) {

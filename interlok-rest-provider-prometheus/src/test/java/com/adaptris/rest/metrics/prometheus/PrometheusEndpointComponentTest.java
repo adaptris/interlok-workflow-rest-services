@@ -1,13 +1,13 @@
 package com.adaptris.rest.metrics.prometheus;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Properties;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.DefaultMessageFactory;
@@ -26,7 +26,7 @@ public class PrometheusEndpointComponentTest {
 
   private MockWorkflowConsumer mockConsumer;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     mockConsumer = new MockWorkflowConsumer();
 
@@ -37,11 +37,10 @@ public class PrometheusEndpointComponentTest {
     message = DefaultMessageFactory.getDefaultInstance().newMessage();
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception {
     component.stop();
     component.destroy();
-
   }
 
   @Test
@@ -87,15 +86,12 @@ public class PrometheusEndpointComponentTest {
     component.exceptionLogging(false, "hello", new Exception());
   }
 
-
   class MockMetricProvider implements MetricBinder {
     int value = 100;
 
     @Override
     public void bindTo(MeterRegistry registry) throws Exception {
-      Gauge.builder("test-metric", this, MockMetricProvider::getValue)
-          .description("A test metric.")
-          .register(registry);
+      Gauge.builder("test-metric", this, MockMetricProvider::getValue).description("A test metric.").register(registry);
     }
 
     public int getValue() {
@@ -110,4 +106,5 @@ public class PrometheusEndpointComponentTest {
       throw new Exception("Expected");
     }
   }
+
 }

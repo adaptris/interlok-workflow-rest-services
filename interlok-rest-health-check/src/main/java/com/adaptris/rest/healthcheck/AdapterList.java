@@ -4,14 +4,16 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
+
 import lombok.Getter;
 import lombok.Setter;
 
 /**
  * List of adapters that will be returned by the healthcheck
- * 
+ *
  */
 @XStreamAlias("adapters")
 public class AdapterList extends AbstractList<AdapterState> {
@@ -25,13 +27,11 @@ public class AdapterList extends AbstractList<AdapterState> {
     setAdapterStates(new ArrayList<>());
   }
 
-
   public static AdapterList wrap(List<AdapterState> states) {
     AdapterList list = new AdapterList();
     list.setAdapterStates(states);
     return list;
   }
-
 
   @Override
   public AdapterState get(int index) {
@@ -42,7 +42,6 @@ public class AdapterList extends AbstractList<AdapterState> {
   public int size() {
     return getAdapterStates().size();
   }
-
 
   @Override
   public Iterator<AdapterState> iterator() {

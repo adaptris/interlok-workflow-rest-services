@@ -14,6 +14,7 @@ import static interlok.management.proxy.Config.METADATA_CONTENT_TYPE;
 import static interlok.management.proxy.Config.METADATA_STATUS;
 import static interlok.management.proxy.Config.PROXY_PREFIX;
 import static interlok.management.proxy.Config.SEPARATOR;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,9 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
@@ -49,6 +52,7 @@ import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.AbstractHttpEntity;
 import org.apache.hc.core5.util.Args;
 import org.slf4j.MDC;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.StandaloneConsumer;
 import com.adaptris.core.http.jetty.EmbeddedConnection;
@@ -56,6 +60,7 @@ import com.adaptris.core.http.jetty.HeaderHandlerImpl;
 import com.adaptris.core.http.jetty.JettyMessageConsumer;
 import com.adaptris.core.http.jetty.JettyResponseService;
 import com.adaptris.core.http.server.ResponseHeaderProvider;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -85,24 +90,27 @@ public class Helper {
     REQUEST_BUILDERS = Collections.unmodifiableMap(map);
   }
 
-  /** Create a jetty response service.
-   * 
+  /**
+   * Create a jetty response service.
+   *
    * @return a jetty response service
    */
   static JettyResponseService createResponseService() {
-    return new JettyResponseService().withResponseHeaderProvider(new ResponseHeadersSupplier())
-        .withHttpStatus(EXPR_STATUS).withContentType(EXPR_CONTENT_TYPE);
+    return new JettyResponseService().withResponseHeaderProvider(new ResponseHeadersSupplier()).withHttpStatus(EXPR_STATUS)
+        .withContentType(EXPR_CONTENT_TYPE);
   }
 
-  /** Create a HTTP request.
-   * 
+  /**
+   * Create a HTTP request.
+   *
    */
   static HttpUriRequestBase createRequest(String method, String url) {
     return REQUEST_BUILDERS.get(method.toUpperCase()).create(url);
   }
 
-  /** Create a list of standalone consumers from config.
-   * 
+  /**
+   * Create a list of standalone consumers from config.
+   *
    */
   static List<StandaloneConsumer> build(Properties config) {
     Map<String, String> urlsToProxy = asMap(getPropertySubset(config, PROXY_PREFIX, true));
@@ -120,17 +128,16 @@ public class Helper {
     return consumers;
   }
 
-
-  /** Configure the apache http request with information freom the adaptris message.
-   * 
+  /**
+   * Configure the apache http request with information freom the adaptris message.
+   *
    */
   @SuppressWarnings("unchecked")
   static HttpUriRequestBase configureRequest(AdaptrisMessage msg, HttpUriRequestBase request) {
     // Set the payload
     request.setEntity(new AdaptrisMessageWrapper(msg));
     // Copy inbound request headers.
-    Map<String, String> headers =
-        (Map<String, String>) msg.getObjectHeaders().get(KEY_REQUEST_HEADERS);
+    Map<String, String> headers = (Map<String, String>) msg.getObjectHeaders().get(KEY_REQUEST_HEADERS);
     headers.entrySet().stream().forEach((h) -> request.addHeader(h.getKey(), h.getValue()));
     return request;
   }
@@ -146,14 +153,12 @@ public class Helper {
       log.trace("Ignored exception sending HTTP response {}", exc.getMessage());
     }
   }
-  
 
   // Create a jetty message consumer for the path specified.
   static JettyMessageConsumer createConsumer(String path) {
     JettyMessageConsumer consumer = new JettyMessageConsumer() {
       @Override
-      public AdaptrisMessage createMessage(HttpServletRequest request, HttpServletResponse response)
-          throws IOException, ServletException {
+      public AdaptrisMessage createMessage(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         MDC.put(LOGGING_CONTEXT, LOGGING_CONTEXT_REF);
         return super.createMessage(request, response);
       }
@@ -165,10 +170,10 @@ public class Helper {
     return consumer;
   }
 
-
   private static String rewild(String s) {
-    if (s.endsWith("/*"))
+    if (s.endsWith("/*")) {
       return s;
+    }
     return s + "/*";
   }
 
@@ -217,14 +222,13 @@ public class Helper {
   static class ResponseToMessage implements HttpClientResponseHandler<AdaptrisMessage> {
 
     private transient AdaptrisMessage msg;
-    
+
     public ResponseToMessage(AdaptrisMessage target) {
       msg = target;
     }
-    
+
     @Override
-    public AdaptrisMessage handleResponse(ClassicHttpResponse response)
-        throws HttpException, IOException {
+    public AdaptrisMessage handleResponse(ClassicHttpResponse response) throws HttpException, IOException {
       HttpEntity entity = response.getEntity();
       try (OutputStream out = msg.getOutputStream(); InputStream in = entity.getContent()) {
         IOUtils.copy(in, out);
@@ -240,7 +244,7 @@ public class Helper {
   // Wraps headers/status/content-type for insertion as object metadata.
   @SuppressWarnings("unchecked")
   @AllArgsConstructor
-  static class HttpResponseInfo {    
+  static class HttpResponseInfo {
 
     @Getter
     @Setter(AccessLevel.PRIVATE)
@@ -255,14 +259,13 @@ public class Helper {
     public HttpResponseInfo() {
       this(Collections.EMPTY_MAP);
     }
-    
+
     public HttpResponseInfo(Map<String, String> headers) {
       this(HttpURLConnection.HTTP_INTERNAL_ERROR, CONTENT_TYPE_DEFAULT, headers);
     }
-   
+
     public HttpResponseInfo(ClassicHttpResponse response) {
-      this(response.getCode(),
-          StringUtils.defaultIfBlank(response.getEntity().getContentType(), CONTENT_TYPE_DEFAULT),
+      this(response.getCode(), StringUtils.defaultIfBlank(response.getEntity().getContentType(), CONTENT_TYPE_DEFAULT),
           grabHeaders(response));
     }
 
@@ -281,7 +284,6 @@ public class Helper {
 
   }
 
-
   // Wraps an adaptris message for sending via apache http.
   static class AdaptrisMessageWrapper extends AbstractHttpEntity {
 
@@ -294,7 +296,6 @@ public class Helper {
       super((String) null, null, false);
       this.msg = msg;
     }
-
 
     @Override
     public boolean isRepeatable() {
@@ -329,4 +330,5 @@ public class Helper {
 
     }
   }
+
 }

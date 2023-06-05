@@ -1,17 +1,20 @@
 package com.adaptris.rest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.verify;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.MDC;
+
 import com.adaptris.core.AdaptrisMessageListener;
 import com.adaptris.core.StandaloneConsumer;
 import com.adaptris.core.http.jetty.JettyMessageConsumer;
@@ -21,11 +24,13 @@ public class WorkflowServicesConsumerTest {
 
   private WorkflowServicesConsumer servicesConsumer;
 
-  @Mock private StandaloneConsumer mockStandaloneConsumer;
+  @Mock
+  private StandaloneConsumer mockStandaloneConsumer;
 
-  @Mock private AdaptrisMessageListener mockMessageListener;
+  @Mock
+  private AdaptrisMessageListener mockMessageListener;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     MockitoAnnotations.openMocks(this);
 
@@ -66,4 +71,5 @@ public class WorkflowServicesConsumerTest {
     }
     assertEquals("WorkflowServicesConsumerTest", MDC.get(AbstractRestfulEndpoint.MDC_KEY));
   }
+
 }
