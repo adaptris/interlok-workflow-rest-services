@@ -7,7 +7,7 @@ ext {
 dependencies {
   // The only thing we're actually using is AbstractRestfulEndpoint#MDC_KEY (should we bother?)
 	// api project(':interlok-rest-base')
-  implementation ("org.apache.httpcomponents.client5:httpclient5:5.1.3")
+  implementation ("org.apache.httpcomponents.client5:httpclient5:5.2.1")
   testImplementation ("io.undertow:undertow-core:2.3.6.Final")
 }
 
