@@ -214,7 +214,7 @@ subprojects {
       options.addStringOption "umlExcludedTypeReferences", "java.lang.Exception,java.lang.Object,java.lang.Enum,java.lang.annotation.Annotation"
       options.addStringOption "umlJavaBeanPropertiesAsFields"
       options.addBooleanOption "failOnCyclicPackageDependencies", false
-	  title= componentName
+      title= componentName
     }
   }
 
