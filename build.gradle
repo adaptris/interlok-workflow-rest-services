@@ -33,15 +33,18 @@ ext.hostname = { ->
   return System.getenv("HOSTNAME")
 }
 
+// If graphviz is installed via scoop, plantuml doesn't find it because it's not
+// in its expected "location(s)" it searches for c:\*\graphviz**\dot.exe
+// so windows we'd expect to have the GRAPHVIZ_DOT env defined 
+// On Linux we should be able to find it via the path.
 ext.hasGraphViz = { ->
-//  def app = "dot"
-//  if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-//    app = app + ".exe"
-//  }
-//  return System.getenv("PATH").split(File.pathSeparator).any{
-//    java.nio.file.Paths.get("${it}").resolve(app).toFile().exists()
-//  }
-  return false;
+  def app = "dot"
+  if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+    app = app + ".exe"
+  }
+  return System.getenv("GRAPHVIZ_DOT") !=null ||  System.getenv("PATH").split(File.pathSeparator).any{
+    java.nio.file.Paths.get("${it}").resolve(app).toFile().exists()
+  }
 }
 
 ext.gitBranchNameOrTimestamp = { branchName ->
@@ -154,7 +157,7 @@ subprojects {
     api ("com.adaptris:interlok-client:$interlokCoreVersion") {changing = true}
 
     annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion")
-    umlDoclet("nl.talsmasoftware:umldoclet:1.1.4")
+    umlDoclet("nl.talsmasoftware:umldoclet:2.0.14")
 
     testImplementation ("org.junit.jupiter:junit-jupiter-engine:5.9.3")
     testImplementation ("com.adaptris:interlok-stubs:$interlokCoreVersion") { changing=true }
@@ -181,7 +184,7 @@ subprojects {
       options.linksOffline(interlokCommonJavadocs, offlineJavadocPackageDir.getCanonicalPath() + "/interlok-common-$interlokCoreVersion-javadoc.jar")
       taglets = ["com.adaptris.taglet.ConfigTaglet", "com.adaptris.taglet.LicenseTaglet"]
       options.addStringOption "tagletpath", configurations.javadoc.asPath
-      options.addStringOption('Xdoclint:none', '-quiet')
+      options.addStringOption "Xdoclint:none", "-quiet"
     }
   }
 
@@ -202,24 +205,16 @@ subprojects {
       options.linksOffline(interlokCommonJavadocs, offlineJavadocPackageDir.getCanonicalPath() + "/interlok-common-$interlokCoreVersion-javadoc.jar")
       taglets = ["com.adaptris.taglet.ConfigTaglet", "com.adaptris.taglet.LicenseTaglet"]
       options.addStringOption "tagletpath", configurations.javadoc.asPath
-      options.addStringOption('Xdoclint:none', '-quiet')
+      options.addStringOption "Xdoclint:none", "-quiet"
       options.docletpath = configurations.umlDoclet.files.asType(List)
       options.doclet = "nl.talsmasoftware.umldoclet.UMLDoclet"
-      options.addStringOption "umlBasePath", destinationDir.getCanonicalPath()
+      // Create class & package use pages
+      options.addStringOption "use"    
       options.addStringOption "umlImageFormat", "SVG"
-      options.addStringOption "umlExcludedReferences", "java.lang.Exception,java.lang.Object,java.lang.Enum"
-      options.addStringOption "umlIncludePrivateClasses","false"
-      options.addStringOption "umlIncludePackagePrivateClasses","false"
-      options.addStringOption "umlIncludeProtectedClasses","false"
-      options.addStringOption "umlIncludeAbstractSuperclassMethods","false"
-      options.addStringOption "umlIncludeConstructors","false"
-      options.addStringOption "umlIncludePublicFields","false"
-      options.addStringOption "umlIncludePackagePrivateFields","false"
-      options.addStringOption "umlIncludeProtectedFields", "false"
-      options.addStringOption "umlIncludeDeprecatedClasses", "false"
-      options.addStringOption "umlIncludePrivateInnerClasses", "false"
-      options.addStringOption "umlIncludePackagePrivateInnerClasses", "false"
-      options.addStringOption "umlIncludeProtectedInnerClasses","false"
+      options.addStringOption "umlExcludedTypeReferences", "java.lang.Exception,java.lang.Object,java.lang.Enum,java.lang.annotation.Annotation"
+      options.addStringOption "umlJavaBeanPropertiesAsFields"
+      options.addBooleanOption "failOnCyclicPackageDependencies", false
+	  title= componentName
     }
   }
 
