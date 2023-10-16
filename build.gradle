@@ -24,7 +24,7 @@ ext {
 
   slf4jVersion = '1.7.32'
   mockitoVersion = '4.9.0'
-  log4j2Version = '2.20.0'
+  log4j2Version = '2.21.0'
 }
 
 ext.hostname = { ->
