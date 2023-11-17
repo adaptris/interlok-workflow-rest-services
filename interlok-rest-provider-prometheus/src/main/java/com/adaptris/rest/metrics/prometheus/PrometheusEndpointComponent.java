@@ -4,10 +4,13 @@ import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_DEFAULT;
 
 import java.util.Properties;
 import java.util.function.Consumer;
+
 import org.apache.commons.lang3.BooleanUtils;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.rest.AbstractRestfulEndpoint;
 import com.adaptris.rest.metrics.MetricProviders;
+
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.micrometer.prometheus.PrometheusRenameFilter;
@@ -16,16 +19,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-public class PrometheusEndpointComponent  extends AbstractRestfulEndpoint {
+public class PrometheusEndpointComponent extends AbstractRestfulEndpoint {
 
   private static final String ACCEPTED_FILTER = "GET";
 
   private static final String DEFAULT_PATH = "/prometheus/metrics/*";
-  
+
   private static final String CONTENT_TYPE_DEFAULT = "text/plain";
 
-  private static final transient boolean ADDITIONAL_DEBUG =
-      BooleanUtils.toBoolean(System.getProperty("interlok.prometheus.debug", "false"));
+  private static final transient boolean ADDITIONAL_DEBUG = BooleanUtils
+      .toBoolean(System.getProperty("interlok.prometheus.debug", "false"));
 
   @Getter(AccessLevel.PROTECTED)
   private transient final String defaultUrlPath = DEFAULT_PATH;
@@ -34,18 +37,18 @@ public class PrometheusEndpointComponent  extends AbstractRestfulEndpoint {
   private transient final String acceptedFilter = ACCEPTED_FILTER;
 
   private PrometheusMeterRegistry prometheusRegistry;
-  
+
   @Override
   public void init(Properties config) throws Exception {
     prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
     prometheusRegistry.config().meterFilter(new PrometheusRenameFilter());
   }
-  
+
   @Override
   public void stop() throws Exception {
     prometheusRegistry.close();
   }
-  
+
   @Override
   public void onAdaptrisMessage(AdaptrisMessage message, Consumer<AdaptrisMessage> success, Consumer<AdaptrisMessage> failure) {
     try {
@@ -74,4 +77,5 @@ public class PrometheusEndpointComponent  extends AbstractRestfulEndpoint {
       log.trace(msg, e);
     }
   }
+
 }

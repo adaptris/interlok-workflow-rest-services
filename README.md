@@ -1,6 +1,12 @@
 # interlok-workflow-rest-services
 
-[![GitHub tag](https://img.shields.io/github/tag/adaptris/interlok-workflow-rest-services.svg)](https://github.com/adaptris/interlok-workflow-rest-services/tags) ![license](https://img.shields.io/github/license/adaptris/interlok-workflow-rest-services.svg) [![Actions Status](https://github.com/adaptris/interlok-workflow-rest-services/workflows/Java%20CI/badge.svg)](https://github.com/adaptris/interlok-workflow-rest-services/actions) [![codecov](https://codecov.io/gh/adaptris/interlok-workflow-rest-services/branch/develop/graph/badge.svg)](https://codecov.io/gh/adaptris/interlok-workflow-rest-services) [![Total alerts](https://img.shields.io/lgtm/alerts/g/adaptris/interlok-workflow-rest-services.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adaptris/interlok-workflow-rest-services/alerts/) [![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/adaptris/interlok-workflow-rest-services.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adaptris/interlok-workflow-rest-services/context:java)
+[![GitHub tag](https://img.shields.io/github/tag/adaptris/interlok-workflow-rest-services.svg)](https://github.com/adaptris/interlok-workflow-rest-services/tags)
+[![license](https://img.shields.io/github/license/adaptris/interlok-workflow-rest-services.svg)](https://github.com/adaptris/interlok-workflow-rest-services/blob/develop/LICENSE)
+[![Actions Status](https://github.com/adaptris/interlok-workflow-rest-services/actions/workflows/gradle-publish.yml/badge.svg)](https://github.com/adaptris/interlok-workflow-rest-services/actions)
+[![codecov](https://codecov.io/gh/adaptris/interlok-workflow-rest-services/branch/develop/graph/badge.svg)](https://codecov.io/gh/adaptris/interlok-workflow-rest-services)
+[![CodeQL](https://github.com/adaptris/interlok-workflow-rest-services/workflows/CodeQL/badge.svg)](https://github.com/adaptris/interlok-workflow-rest-services/security/code-scanning)
+[![Known Vulnerabilities](https://snyk.io/test/github/adaptris/interlok-workflow-rest-services/badge.svg?targetFile=build.gradle)](https://snyk.io/test/github/adaptris/interlok-workflow-rest-services?targetFile=build.gradle)
+[![Closed PRs](https://img.shields.io/github/issues-pr-closed/adaptris/interlok-workflow-rest-services)](https://github.com/adaptris/interlok-workflow-rest-services/pulls?q=is%3Apr+is%3Aclosed)
 
 REST style API for Interlok.
 

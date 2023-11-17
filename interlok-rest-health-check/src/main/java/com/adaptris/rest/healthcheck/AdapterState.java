@@ -2,7 +2,9 @@ package com.adaptris.rest.healthcheck;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,4 +30,5 @@ public class AdapterState extends State {
     }
     return getChannelStates();
   }
+
 }

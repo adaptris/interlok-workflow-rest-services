@@ -4,6 +4,7 @@ import static com.adaptris.rest.WorkflowServicesConsumer.CONTENT_TYPE_JSON;
 import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_DEFAULT;
 import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_NOT_READY;
 import static com.adaptris.rest.WorkflowServicesConsumer.OK_200;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,9 +17,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
+
 import org.slf4j.MDC;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.ClosedState;
 import com.adaptris.core.ComponentState;
@@ -30,6 +34,7 @@ import com.adaptris.core.http.jetty.JettyConstants;
 import com.adaptris.rest.AbstractRestfulEndpoint;
 import com.adaptris.rest.util.JmxMBeanHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -58,20 +63,14 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
   private static final String READINESS_URL = "^.*/ready$";
   private static final String DEFAULT_URL = "^.*$";
 
-  private static final List<String> URL_PATTERNS =
-      Collections.unmodifiableList(Arrays.asList(LIVENESS_URL, READINESS_URL, DEFAULT_URL));
+  private static final List<String> URL_PATTERNS = Collections.unmodifiableList(Arrays.asList(LIVENESS_URL, READINESS_URL, DEFAULT_URL));
 
   // mapping "StartedState" -> StartedState.getInstance()
-  private static final List<ComponentState> STATE_LIST =
-      Collections.unmodifiableList(Arrays.asList(
-          StoppedState.getInstance(),
-          InitialisedState.getInstance(),
-          StartedState.getInstance(),
-          ClosedState.getInstance()));
+  private static final List<ComponentState> STATE_LIST = Collections.unmodifiableList(
+      Arrays.asList(StoppedState.getInstance(), InitialisedState.getInstance(), StartedState.getInstance(), ClosedState.getInstance()));
 
-  private static final Map<String, ComponentState> NAME_TO_COMPONENT_STATE =
-      Collections.unmodifiableMap(STATE_LIST.stream()
-          .collect(Collectors.toMap((s) -> s.getClass().getSimpleName(), s -> s)));
+  private static final Map<String, ComponentState> NAME_TO_COMPONENT_STATE = Collections
+      .unmodifiableMap(STATE_LIST.stream().collect(Collectors.toMap((s) -> s.getClass().getSimpleName(), s -> s)));
 
   @Getter(AccessLevel.PACKAGE)
   @Setter(AccessLevel.PACKAGE)
@@ -83,13 +82,11 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
   @Getter(AccessLevel.PROTECTED)
   private transient final String acceptedFilter = ACCEPTED_FILTER;
 
-
   @Getter(AccessLevel.PROTECTED)
   private transient final String defaultUrlPath = DEFAULT_PATH;
 
   // maps the jettyURI metadata value into its appropriate behaviour.
   private final Map<String, RequestHandler> urlRoutes;
-
 
   public WorkflowHealthCheckComponent() {
     super();
@@ -122,18 +119,14 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
   }
 
   @Override
-  public void onAdaptrisMessage(AdaptrisMessage message,
-      Consumer<AdaptrisMessage> onSuccess, Consumer<AdaptrisMessage> onFailure) {
+  public void onAdaptrisMessage(AdaptrisMessage message, Consumer<AdaptrisMessage> onSuccess, Consumer<AdaptrisMessage> onFailure) {
     // this is arguably redundant because it's added in the consumer...
     MDC.put(MDC_KEY, friendlyName());
     String pathValue = message.getMetadataValue(PATH_KEY);
     try {
       // DEFAULT_BRANCH should always match, so if get() throws an exception
       // then we're in an error state anyway.
-      RequestHandler handler = URL_PATTERNS.stream().filter((s) -> pathValue.matches(s))
-          .findFirst()
-          .map((s) -> urlRoutes.get(s))
-          .get();
+      RequestHandler handler = URL_PATTERNS.stream().filter((s) -> pathValue.matches(s)).findFirst().map((s) -> urlRoutes.get(s)).get();
       handler.handle(message);
       onSuccess.accept(message);
     } catch (NotReadyException e) {
@@ -145,7 +138,6 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
       MDC.remove(MDC_KEY);
     }
   }
-
 
   private void sendPayload(AdaptrisMessage message, String newPayload, int httpStatus) {
     // Since JSON should always be UTF-8
@@ -172,22 +164,18 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
     return states;
   }
 
-  private AdapterState buildAdapterState(ObjectInstance mbean, IfNotReady handler)
-      throws Exception {
+  private AdapterState buildAdapterState(ObjectInstance mbean, IfNotReady handler) throws Exception {
     String objRef = mbean.getObjectName().toString();
     String id = getJmxMBeanHelper().getStringAttribute(objRef, UNIQUE_ID);
     String stateStr = getJmxMBeanHelper().getStringAttributeClassName(objRef, COMPONENT_STATE);
     AdapterState report = new AdapterState().withId(id).withState(stateStr);
     verifyReady(id, stateStr, handler);
-    Set<ObjectName> channels =
-        getJmxMBeanHelper().getObjectSetAttribute(objRef, CHILDREN_ATTRIBUTE);
+    Set<ObjectName> channels = getJmxMBeanHelper().getObjectSetAttribute(objRef, CHILDREN_ATTRIBUTE);
     addChannelStates(report, channels, handler);
     return report;
   }
 
-
-  private void addChannelStates(AdapterState adapterState, Set<ObjectName> namedChannels,
-      IfNotReady handler) throws Exception {
+  private void addChannelStates(AdapterState adapterState, Set<ObjectName> namedChannels, IfNotReady handler) throws Exception {
 
     for (ObjectName channel : namedChannels) {
       String objRef = channel.toString();
@@ -195,16 +183,13 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
       String stateStr = getJmxMBeanHelper().getStringAttributeClassName(objRef, COMPONENT_STATE);
       ChannelState report = new ChannelState().withId(id).withState(stateStr);
       verifyReady(id, stateStr, handler);
-      Set<ObjectName> workflows =
-          getJmxMBeanHelper().getObjectSetAttribute(objRef, CHILDREN_ATTRIBUTE);
+      Set<ObjectName> workflows = getJmxMBeanHelper().getObjectSetAttribute(objRef, CHILDREN_ATTRIBUTE);
       addWorkflowStates(report, workflows, handler);
       adapterState.applyDefaultIfNull().add(report);
     }
   }
 
-
-  private void addWorkflowStates(ChannelState channelState, Set<ObjectName> namedWorkflows,
-      IfNotReady handler) throws Exception {
+  private void addWorkflowStates(ChannelState channelState, Set<ObjectName> namedWorkflows, IfNotReady handler) throws Exception {
     for (ObjectName workflow : namedWorkflows) {
       String objRef = workflow.toString();
       String id = getJmxMBeanHelper().getStringAttribute(objRef, UNIQUE_ID);
@@ -215,8 +200,7 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
     }
   }
 
-  private static void verifyReady(String id, String state, IfNotReady handler)
-      throws Exception {
+  private static void verifyReady(String id, String state, IfNotReady handler) throws Exception {
     ComponentState compState = NAME_TO_COMPONENT_STATE.get(state);
     // If we get our states out of sync (i.e. compState = null), then it's not ready.
     if (!StartedState.getInstance().equals(compState)) {
@@ -251,4 +235,5 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
       super(e);
     }
   }
+
 }

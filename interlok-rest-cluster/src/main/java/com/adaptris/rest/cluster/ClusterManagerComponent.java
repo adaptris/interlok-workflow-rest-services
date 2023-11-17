@@ -1,10 +1,14 @@
 package com.adaptris.rest.cluster;
+
 import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_DEFAULT;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.Consumer;
+
 import org.slf4j.MDC;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.CoreException;
 import com.adaptris.core.XStreamJsonMarshaller;
@@ -13,12 +17,12 @@ import com.adaptris.mgmt.cluster.mbean.ClusterManagerMBean;
 import com.adaptris.rest.AbstractRestfulEndpoint;
 import com.adaptris.rest.HttpRestWorkflowServicesConsumer;
 import com.adaptris.rest.util.JmxMBeanHelper;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 public class ClusterManagerComponent extends AbstractRestfulEndpoint {
-
 
   private static final String BOOTSTRAP_PATH_KEY = "rest.cluster-manager.path";
 
@@ -38,24 +42,24 @@ public class ClusterManagerComponent extends AbstractRestfulEndpoint {
   @Getter(AccessLevel.PROTECTED)
   private transient final String acceptedFilter = ACCEPTED_FILTER;
 
-  public ClusterManagerComponent () {
+  public ClusterManagerComponent() {
     super();
     setJmxMBeanHelper(new JmxMBeanHelper());
   }
 
   @Override
-  public void onAdaptrisMessage(AdaptrisMessage message,
-      Consumer<AdaptrisMessage> onSuccess, Consumer<AdaptrisMessage> onFailure) {
+  public void onAdaptrisMessage(AdaptrisMessage message, Consumer<AdaptrisMessage> onSuccess, Consumer<AdaptrisMessage> onFailure) {
     try {
       MDC.put(MDC_KEY, friendlyName());
 
       ClusterManagerMBean clusterManager = getJmxMBeanHelper().proxyMBean(CLUSTER_MANAGER_OBJECT_NAME, ClusterManagerMBean.class);
 
-      final List<ClusterInstance> clusterInstances = new ArrayList<ClusterInstance>();
+      final List<ClusterInstance> clusterInstances = new ArrayList<>();
       clusterManager.getClusterInstances().getKeys().forEach(key -> {
         try {
           clusterInstances.add((ClusterInstance) clusterManager.getClusterInstances().get(key));
-        } catch (CoreException e) {}
+        } catch (CoreException e) {
+        }
       });
       String jsonString = new XStreamJsonMarshaller().marshal(clusterInstances);
       message.setContent(jsonString, message.getContentEncoding());

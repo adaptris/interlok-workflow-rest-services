@@ -2,7 +2,9 @@ package com.adaptris.rest.healthcheck;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,6 +12,7 @@ import lombok.Setter;
 @XStreamAlias("channel-state")
 @NoArgsConstructor
 public class ChannelState extends State {
+
   // Defaults to "null" to avoid [""] as the output; better for it to be not present rather than
   // the wrong type?
   @Getter
@@ -27,4 +30,5 @@ public class ChannelState extends State {
     }
     return getWorkflowStates();
   }
+
 }

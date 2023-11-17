@@ -2,14 +2,17 @@ import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.filters.*
 
 plugins {
-  id 'com.github.spotbugs' version '5.0.14' apply false
-  id "io.freefair.lombok" version "6.5.1" apply false
-  id 'org.owasp.dependencycheck' version '8.2.1' apply false
+  // Manage optional dependencies in maven pom.
+  id "nebula.optional-base" version "7.0.0"  apply false
+  id "com.github.spotbugs" version "5.2.1" apply false
+  id "org.sonarqube" version "4.4.1.3373"
+  id "io.freefair.lombok" version "8.4" apply false
+  id "org.owasp.dependencycheck" version "8.4.2" apply false
 }
 
 ext {
-  interlokCoreVersion = project.findProperty('interlokCoreVersion') ?: '4.8-SNAPSHOT'
-  releaseVersion = project.findProperty('releaseVersion') ?: '4.8-SNAPSHOT'
+  interlokCoreVersion = project.findProperty('interlokCoreVersion') ?: '5.0-SNAPSHOT'
+  releaseVersion = project.findProperty('releaseVersion') ?: '5.0-SNAPSHOT'
   nexusBaseUrl = project.findProperty('nexusBaseUrl') ?: 'https://nexus.adaptris.net/nexus'
   mavenPublishUrl = project.findProperty('mavenPublishUrl') ?: nexusBaseUrl + '/content/repositories/snapshots'
   javadocsBaseUrl = nexusBaseUrl + "/content/sites/javadocs/com/adaptris"
@@ -22,9 +25,8 @@ ext {
 
   organizationName = "Adaptris Ltd"
 
-  slf4jVersion = '1.7.32'
   mockitoVersion = '4.9.0'
-  log4j2Version = '2.20.0'
+  log4j2Version = '2.21.1'
 }
 
 ext.hostname = { ->
@@ -34,15 +36,18 @@ ext.hostname = { ->
   return System.getenv("HOSTNAME")
 }
 
+// If graphviz is installed via scoop, plantuml doesn't find it because it's not
+// in its expected "location(s)" it searches for c:\*\graphviz**\dot.exe
+// so windows we'd expect to have the GRAPHVIZ_DOT env defined 
+// On Linux we should be able to find it via the path.
 ext.hasGraphViz = { ->
-//  def app = "dot"
-//  if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-//    app = app + ".exe"
-//  }
-//  return System.getenv("PATH").split(File.pathSeparator).any{
-//    java.nio.file.Paths.get("${it}").resolve(app).toFile().exists()
-//  }
-  return false;
+  def app = "dot"
+  if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+    app = app + ".exe"
+  }
+  return System.getenv("GRAPHVIZ_DOT") !=null ||  System.getenv("PATH").split(File.pathSeparator).any{
+    java.nio.file.Paths.get("${it}").resolve(app).toFile().exists()
+  }
 }
 
 ext.gitBranchNameOrTimestamp = { branchName ->
@@ -72,9 +77,16 @@ def propertyTemplate(dir, filename) {
   return filename
 }
 
-
 task clean(type: Delete) {
   delete project.buildDir
+}
+
+sonar {
+  properties {
+    property "sonar.projectKey", "adaptris_interlok-workflow-rest-services"
+    property "sonar.organization", "adaptris-org"
+    property "sonar.host.url", "https://sonarcloud.io"
+  }
 }
 
 allprojects {
@@ -93,15 +105,16 @@ allprojects {
 
 subprojects {
   // Apply the java plugin to add support for Java
-  apply plugin: 'java-library'
-  apply plugin: 'maven-publish'
+  apply plugin: "java-library"
+  apply plugin: "maven-publish"
   apply plugin: "jacoco"
   apply plugin: "io.freefair.lombok"
-  apply plugin: 'com.github.spotbugs'
-  apply plugin: 'org.owasp.dependencycheck'
+  apply plugin: "com.github.spotbugs"
+  apply plugin: "org.sonarqube"
+  apply plugin: "org.owasp.dependencycheck"
 
-  sourceCompatibility = JavaVersion.VERSION_11
-  targetCompatibility = JavaVersion.VERSION_11
+  sourceCompatibility = JavaVersion.VERSION_17
+  targetCompatibility = JavaVersion.VERSION_17
   group   = 'com.adaptris'
   version = releaseVersion
   def versionDir = "$buildDir/version"
@@ -156,9 +169,9 @@ subprojects {
     api ("com.adaptris:interlok-client:$interlokCoreVersion") {changing = true}
 
     annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion")
-    umlDoclet("nl.talsmasoftware:umldoclet:1.1.4")
+    umlDoclet("nl.talsmasoftware:umldoclet:2.1.0")
 
-    testImplementation ('junit:junit:4.13.2')
+    testImplementation ("org.junit.jupiter:junit-jupiter-engine:5.10.0")
     testImplementation ("com.adaptris:interlok-stubs:$interlokCoreVersion") { changing=true }
     testImplementation ("org.mockito:mockito-core:$mockitoVersion")
     testImplementation ("org.mockito:mockito-inline:$mockitoVersion")
@@ -183,8 +196,7 @@ subprojects {
       options.linksOffline(interlokCommonJavadocs, offlineJavadocPackageDir.getCanonicalPath() + "/interlok-common-$interlokCoreVersion-javadoc.jar")
       taglets = ["com.adaptris.taglet.ConfigTaglet", "com.adaptris.taglet.LicenseTaglet"]
       options.addStringOption "tagletpath", configurations.javadoc.asPath
-	    options.addBooleanOption "-no-module-directories", true
-      options.addStringOption('Xdoclint:none', '-quiet')
+      options.addStringOption "Xdoclint:none", "-quiet"
     }
   }
 
@@ -205,33 +217,23 @@ subprojects {
       options.linksOffline(interlokCommonJavadocs, offlineJavadocPackageDir.getCanonicalPath() + "/interlok-common-$interlokCoreVersion-javadoc.jar")
       taglets = ["com.adaptris.taglet.ConfigTaglet", "com.adaptris.taglet.LicenseTaglet"]
       options.addStringOption "tagletpath", configurations.javadoc.asPath
-	    options.addBooleanOption "-no-module-directories", true
-      options.addStringOption('Xdoclint:none', '-quiet')
+      options.addStringOption "Xdoclint:none", "-quiet"
       options.docletpath = configurations.umlDoclet.files.asType(List)
       options.doclet = "nl.talsmasoftware.umldoclet.UMLDoclet"
-      options.addStringOption "umlBasePath", destinationDir.getCanonicalPath()
+      // Create class & package use pages
+      options.addStringOption "use"    
       options.addStringOption "umlImageFormat", "SVG"
-      options.addStringOption "umlExcludedReferences", "java.lang.Exception,java.lang.Object,java.lang.Enum"
-      options.addStringOption "umlIncludePrivateClasses","false"
-      options.addStringOption "umlIncludePackagePrivateClasses","false"
-      options.addStringOption "umlIncludeProtectedClasses","false"
-      options.addStringOption "umlIncludeAbstractSuperclassMethods","false"
-      options.addStringOption "umlIncludeConstructors","false"
-      options.addStringOption "umlIncludePublicFields","false"
-      options.addStringOption "umlIncludePackagePrivateFields","false"
-      options.addStringOption "umlIncludeProtectedFields", "false"
-      options.addStringOption "umlIncludeDeprecatedClasses", "false"
-      options.addStringOption "umlIncludePrivateInnerClasses", "false"
-      options.addStringOption "umlIncludePackagePrivateInnerClasses", "false"
-      options.addStringOption "umlIncludeProtectedInnerClasses","false"
+      options.addStringOption "umlExcludedTypeReferences", "java.lang.Exception,java.lang.Object,java.lang.Enum,java.lang.annotation.Annotation"
+      options.addStringOption "umlJavaBeanPropertiesAsFields"
+      options.addBooleanOption "failOnCyclicPackageDependencies", false
     }
   }
 
   jacocoTestReport {
-      reports {
-          xml.required= true
-          html.required= true
-      }
+    reports {
+      xml.required= true
+      html.required= true
+    }
   }
 
   sourceSets {
@@ -313,9 +315,6 @@ subprojects {
     }
   }
 
-  // disable spotbugsTests which checks our test code..
-  spotbugsTest.enabled = false
-
   dependencyCheck  {
     suppressionFiles= [ "https://raw.githubusercontent.com/adaptris/interlok/develop/gradle/owasp-exclude.xml" ]
     scanConfigurations = [ "api", "compileClasspath", "runtimeClasspath" ]
@@ -337,7 +336,14 @@ subprojects {
     classpath = project.sourceSets.main.compileClasspath
   }
 
+  test {
+    jvmArgs = ['--add-opens', 'java.base/java.lang=ALL-UNNAMED', '--add-opens', 'java.base/java.util=ALL-UNNAMED']
+    useJUnitPlatform()
+  }
+
+  // disable spotbugsTests which checks our test code..
+  spotbugsTest.enabled = false
+
   check.dependsOn jacocoTestReport
   javadoc.dependsOn offlinePackageList, umlJavadoc
-
 }

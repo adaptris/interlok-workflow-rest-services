@@ -1,13 +1,17 @@
 package com.adaptris.rest;
 
 import static com.adaptris.rest.AbstractRestfulEndpoint.MDC_KEY;
+
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.MDC;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageListener;
 import com.adaptris.core.StandaloneConsumer;
@@ -18,6 +22,7 @@ import com.adaptris.core.http.jetty.JettyResponseService;
 import com.adaptris.core.http.jetty.MetadataHeaderHandler;
 import com.adaptris.core.http.jetty.MetadataParameterHandler;
 import com.adaptris.core.http.jetty.NoOpResponseHeaderProvider;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,15 +51,15 @@ public class HttpRestWorkflowServicesConsumer extends WorkflowServicesConsumer {
   }
 
   @Override
-  protected StandaloneConsumer configureConsumer(AdaptrisMessageListener messageListener, String consumedUrlPath, String acceptedHttpMethods) {
+  protected StandaloneConsumer configureConsumer(AdaptrisMessageListener messageListener, String consumedUrlPath,
+      String acceptedHttpMethods) {
     setResponseService(new JettyResponseService().withResponseHeaderProvider(new NoOpResponseHeaderProvider())
         .withHttpStatus("%message{httpReplyStatus}").withContentType("%message{httpReplyContentType}"));
 
     EmbeddedConnection jettyConnection = new EmbeddedConnection();
     JettyMessageConsumer messageConsumer = new JettyMessageConsumer() {
       @Override
-      public AdaptrisMessage createMessage(HttpServletRequest request, HttpServletResponse response)
-          throws IOException, ServletException {
+      public AdaptrisMessage createMessage(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         MDC.put(MDC_KEY, getOwner());
         return super.createMessage(request, response);
       }
@@ -70,14 +75,11 @@ public class HttpRestWorkflowServicesConsumer extends WorkflowServicesConsumer {
   }
 
   @Override
-  protected void doResponse(AdaptrisMessage originalMessage, AdaptrisMessage processedMessage,
-      String contentType, int httpStatus) {
+  protected void doResponse(AdaptrisMessage originalMessage, AdaptrisMessage processedMessage, String contentType, int httpStatus) {
     try {
-      processedMessage.addObjectHeader(JettyConstants.JETTY_WRAPPER,
-          originalMessage.getObjectHeaders().get(JettyConstants.JETTY_WRAPPER));
+      processedMessage.addObjectHeader(JettyConstants.JETTY_WRAPPER, originalMessage.getObjectHeaders().get(JettyConstants.JETTY_WRAPPER));
       processedMessage.addMetadata(METADATA_STATUS, String.valueOf(httpStatus));
-      processedMessage.addMetadata(METADATA_CONTENT_TYPE,
-          StringUtils.defaultIfBlank(contentType, CONTENT_TYPE_DEFAULT));
+      processedMessage.addMetadata(METADATA_CONTENT_TYPE, StringUtils.defaultIfBlank(contentType, CONTENT_TYPE_DEFAULT));
       getResponseService().doService(processedMessage);
     } catch (Exception exc) {
       log.trace("Ignored exception sending HTTP response {}", exc.getMessage());
@@ -89,4 +91,5 @@ public class HttpRestWorkflowServicesConsumer extends WorkflowServicesConsumer {
     message.setContent(ExceptionUtils.getStackTrace(e), message.getContentEncoding());
     doResponse(message, message, CONTENT_TYPE_DEFAULT, httpStatus);
   }
+
 }

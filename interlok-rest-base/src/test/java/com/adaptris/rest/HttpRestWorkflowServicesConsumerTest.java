@@ -1,16 +1,18 @@
 package com.adaptris.rest;
 
 import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_DEFAULT;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+
 import java.util.function.Consumer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageListener;
 import com.adaptris.core.DefaultMessageFactory;
@@ -31,9 +33,10 @@ public class HttpRestWorkflowServicesConsumerTest {
 
   private AdaptrisMessage processedMessage;
 
-  @Mock private JettyResponseService mockResponseService;
+  @Mock
+  private JettyResponseService mockResponseService;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     MockitoAnnotations.openMocks(this);
 
@@ -42,17 +45,13 @@ public class HttpRestWorkflowServicesConsumerTest {
     processedMessage = DefaultMessageFactory.getDefaultInstance().newMessage();
   }
 
-  @After
-  public void tearDown() throws Exception {
-
-  }
-
   @Test
   public void testCreateStandardConsumer() throws Exception {
     StandaloneConsumer standaloneConsumer = servicesConsumer.configureConsumer(new AdaptrisMessageListener() {
       @Override
-      public void onAdaptrisMessage(AdaptrisMessage message,
-              Consumer<AdaptrisMessage> onSuccess, Consumer<AdaptrisMessage> onFailure) {}
+      public void onAdaptrisMessage(AdaptrisMessage message, Consumer<AdaptrisMessage> onSuccess, Consumer<AdaptrisMessage> onFailure) {
+      }
+
       @Override
       public String friendlyName() {
         return null;
@@ -79,7 +78,6 @@ public class HttpRestWorkflowServicesConsumerTest {
     servicesConsumer.doResponse(originalMessage, processedMessage);
   }
 
-
   @Test
   public void testErrorResponse() throws Exception {
     servicesConsumer.setResponseService(mockResponseService);
@@ -87,11 +85,11 @@ public class HttpRestWorkflowServicesConsumerTest {
     verify(mockResponseService).doService(originalMessage);
   }
 
-
   @Test
   public void testErrorResponse_Throws() throws Exception {
     servicesConsumer.setResponseService(mockResponseService);
     doThrow(new ServiceException()).when(mockResponseService).doService(any());
     servicesConsumer.doErrorResponse(originalMessage, new Exception(), ERROR_DEFAULT);
   }
+
 }
