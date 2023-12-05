@@ -2,7 +2,7 @@ import org.apache.tools.ant.taskdefs.condition.Os
 import org.apache.tools.ant.filters.*
 
 plugins {
-  id 'com.github.spotbugs' version '5.2.4' apply false
+  id 'com.github.spotbugs' version '6.0.1' apply false
   id "io.freefair.lombok" version "6.5.1" apply false
   id 'org.owasp.dependencycheck' version '9.0.2' apply false
 }
