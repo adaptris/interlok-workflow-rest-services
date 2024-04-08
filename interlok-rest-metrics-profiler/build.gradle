@@ -11,7 +11,7 @@ dependencies {
 
 	testImplementation project(':interlok-rest-base').sourceSets.test.output
 	testImplementation ("com.adaptris:interlok-profiler:$interlokCoreVersion") { changing = true}
-	testImplementation ('io.micrometer:micrometer-registry-prometheus:1.12.4')
+	testImplementation ('io.micrometer:micrometer-registry-prometheus:1.12.5')
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
