@@ -156,7 +156,7 @@ subprojects {
     api ("com.adaptris:interlok-client:$interlokCoreVersion") {changing = true}
 
     annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion")
-    umlDoclet("nl.talsmasoftware:umldoclet:2.1.2")
+    umlDoclet("nl.talsmasoftware:umldoclet:2.2.0")
 
     testImplementation ('junit:junit:4.13.2')
     testImplementation ("com.adaptris:interlok-stubs:$interlokCoreVersion") { changing=true }
