@@ -50,6 +50,8 @@ public class WorkflowHealthCheckComponentTest {
   private static final String UNIQUE_ID = "UniqueId";
   private static final String CHILDREN_ATTRIBUTE = "Children";
   private static final String COMPONENT_STATE = "ComponentState";
+  private static final String AUTO_START = "AutoStart";
+  
   private static final String CHANNEL_OBJECT_NAME = "com.adaptris:type=Channel,adapter=" + ADAPTER_ID + ",id=" + CHANNEL_ID;
   private static final String WORKFLOW_OBJECT_NAME_1 = "com.adaptris:type=Workflow,adapter=" + ADAPTER_ID + ",channel=" + CHANNEL_ID + ",id=" + WORKFLOW_ID1;
   private static final String WORKFLOW_OBJECT_NAME_2 = "com.adaptris:type=Channel,adapter=" + ADAPTER_ID + ",channel=" + CHANNEL_ID + ",id=" + WORKFLOW_ID2;
@@ -151,6 +153,31 @@ public class WorkflowHealthCheckComponentTest {
       assertTrue(testConsumer.payload.contains(CHANNEL_ID));
       assertTrue(testConsumer.payload.contains(WORKFLOW_ID1));
       assertTrue(testConsumer.payload.contains(WORKFLOW_ID2));
+    } finally {
+      wrapper.destroy();
+    }
+  }
+  
+  @Test
+  public void testHealthCheck_AutoStartFalse() throws Exception {
+    AdaptrisMessage message = AdaptrisMessageFactory.getDefaultInstance().newMessage();
+    message.addMessageHeader(PATH_KEY, "/workflow-health-check");
+    MockedHealthCheckWrapper wrapper = new MockedHealthCheckWrapper().build(true);
+    JmxMBeanHelper mockJmxHelper = wrapper.jmxHelper();
+    TestConsumer testConsumer = wrapper.testConsumer();
+    
+    when(mockJmxHelper.getStringAttribute(new ObjectName(CHANNEL_OBJECT_NAME).toString(), AUTO_START)).thenReturn("false");
+    
+    try {
+      wrapper.start();
+      wrapper.healthCheck().onAdaptrisMessage(message);
+
+      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS).until(testConsumer::complete);
+      assertFalse(testConsumer.isError);
+      assertTrue(testConsumer.payload.contains(ADAPTER_ID));
+      assertFalse(testConsumer.payload.contains(CHANNEL_ID));
+      assertFalse(testConsumer.payload.contains(WORKFLOW_ID1));
+      assertFalse(testConsumer.payload.contains(WORKFLOW_ID2));
     } finally {
       wrapper.destroy();
     }
@@ -269,6 +296,7 @@ public class WorkflowHealthCheckComponentTest {
 
       when(mockJmxHelper.getObjectSetAttribute(adapterObjectName.toString(), CHILDREN_ATTRIBUTE)).thenReturn(channelObjectNames);
       when(mockJmxHelper.getStringAttribute(channelObjectName.toString(), UNIQUE_ID)).thenReturn(CHANNEL_ID);
+      when(mockJmxHelper.getStringAttribute(channelObjectName.toString(), AUTO_START)).thenReturn("true");
       when(mockJmxHelper.getStringAttributeClassName(channelObjectName.toString(), COMPONENT_STATE))
           .thenReturn(StartedState.class.getSimpleName());
 
