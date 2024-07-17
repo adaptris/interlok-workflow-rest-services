@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.MDC;
 
 import com.adaptris.core.AdaptrisMessage;
@@ -56,6 +57,8 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
   private static final String CHILDREN_ATTRIBUTE = "Children";
 
   private static final String COMPONENT_STATE = "ComponentState";
+  
+  private static final String AUTO_START = "AutoStart";
 
   private static final String PATH_KEY = JettyConstants.JETTY_URI;
 
@@ -181,11 +184,14 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
       String objRef = channel.toString();
       String id = getJmxMBeanHelper().getStringAttribute(objRef, UNIQUE_ID);
       String stateStr = getJmxMBeanHelper().getStringAttributeClassName(objRef, COMPONENT_STATE);
+      boolean autoStart = BooleanUtils.toBoolean(getJmxMBeanHelper().getStringAttribute(objRef, AUTO_START));
       ChannelState report = new ChannelState().withId(id).withState(stateStr);
-      verifyReady(id, stateStr, handler);
-      Set<ObjectName> workflows = getJmxMBeanHelper().getObjectSetAttribute(objRef, CHILDREN_ATTRIBUTE);
-      addWorkflowStates(report, workflows, handler);
-      adapterState.applyDefaultIfNull().add(report);
+      if(autoStart) { // ignore channels and their children if not auto-start=true
+        verifyReady(id, stateStr, handler);
+        Set<ObjectName> workflows = getJmxMBeanHelper().getObjectSetAttribute(objRef, CHILDREN_ATTRIBUTE);
+        addWorkflowStates(report, workflows, handler);
+        adapterState.applyDefaultIfNull().add(report);
+      }
     }
   }
 
