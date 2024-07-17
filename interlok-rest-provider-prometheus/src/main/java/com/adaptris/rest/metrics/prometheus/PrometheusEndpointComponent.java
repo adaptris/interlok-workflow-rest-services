@@ -11,9 +11,9 @@ import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.rest.AbstractRestfulEndpoint;
 import com.adaptris.rest.metrics.MetricProviders;
 
-import io.micrometer.prometheus.PrometheusConfig;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.micrometer.prometheus.PrometheusRenameFilter;
+import io.micrometer.prometheusmetrics.PrometheusConfig;
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
+import io.micrometer.prometheusmetrics.PrometheusRenameFilter;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
