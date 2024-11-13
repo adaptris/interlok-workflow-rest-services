@@ -110,8 +110,7 @@ public class ClusterManagerComponentTest {
     assertTrue(instances.size() == 1);
     
     @SuppressWarnings("rawtypes")
-	ArrayList instancesList = (ArrayList) instances.get(0);
-    ClusterInstance clusterInstance = (ClusterInstance) instancesList.get(0);
+    ClusterInstance clusterInstance = (ClusterInstance) instances.get(0);
     
     assertTrue(clusterInstance.getUniqueId().equals(clusterInstanceOne.getUniqueId()));
     assertTrue(clusterInstance.getClusterUuid().equals(clusterInstanceOne.getClusterUuid()));
@@ -134,7 +133,7 @@ public class ClusterManagerComponentTest {
     List<?> instances = (List<?>) new XStreamJsonMarshaller().unmarshal(testConsumer.getPayload());
     
     @SuppressWarnings("rawtypes")
-	ArrayList instancesList = (ArrayList) instances.get(0);
+	ArrayList instancesList = (ArrayList) instances;
     assertTrue(instancesList.size() == 2);
     
     ClusterInstance clusterInstance = (ClusterInstance) instancesList.get(0);
