@@ -7,11 +7,7 @@ ext {
 dependencies {
   api project(':interlok-rest-base')
   api project(':interlok-rest-metrics-jvm')
-  // io.micrometer:micrometer-registry-prometheus-simpleclient is deprecated but doesn't have any api changes so
-  // we are using that now. Once we agreed that we can got with the API changes we should switch to io.micrometer:micrometer-registry-prometheus
-  // https://github.com/micrometer-metrics/micrometer/wiki/1.13-Migration-Guide
-  // api ('io.micrometer:micrometer-registry-prometheus:1.13.2')
-  api ('io.micrometer:micrometer-registry-prometheus-simpleclient:1.13.3')
+  api ('io.micrometer:micrometer-registry-prometheus:1.13.7')
 
   testImplementation project(':interlok-rest-base').sourceSets.test.output
 }
