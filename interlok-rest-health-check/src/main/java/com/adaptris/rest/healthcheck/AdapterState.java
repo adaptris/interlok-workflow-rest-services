@@ -19,8 +19,17 @@ public class AdapterState extends State {
   @Setter
   private List<ChannelState> channelStates;
 
+  @Getter
+  @Setter
+  private List<ConnectionState> connectionStates;
+
   public AdapterState withChannelStates(List<ChannelState> states) {
     setChannelStates(states);
+    return this;
+  }
+
+  public AdapterState withConnectionStates(List<ConnectionState> states) {
+    setConnectionStates(states);
     return this;
   }
 
@@ -29,6 +38,13 @@ public class AdapterState extends State {
       return withChannelStates(new ArrayList<>()).getChannelStates();
     }
     return getChannelStates();
+  }
+
+  public List<ConnectionState> applyConnectionDefaultIfNull() {
+    if (getConnectionStates() == null) {
+      return withConnectionStates(new ArrayList<>()).getConnectionStates();
+    }
+    return getConnectionStates();
   }
 
 }
