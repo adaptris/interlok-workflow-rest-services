@@ -1,10 +1,5 @@
 package com.adaptris.rest.healthcheck;
 
-import static com.adaptris.rest.WorkflowServicesConsumer.CONTENT_TYPE_JSON;
-import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_DEFAULT;
-import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_NOT_READY;
-import static com.adaptris.rest.WorkflowServicesConsumer.OK_200;
-
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +28,10 @@ import com.adaptris.core.StoppedState;
 import com.adaptris.core.XStreamJsonMarshaller;
 import com.adaptris.core.http.jetty.JettyConstants;
 import com.adaptris.rest.AbstractRestfulEndpoint;
+import static com.adaptris.rest.WorkflowServicesConsumer.CONTENT_TYPE_JSON;
+import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_DEFAULT;
+import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_NOT_READY;
+import static com.adaptris.rest.WorkflowServicesConsumer.OK_200;
 import com.adaptris.rest.util.JmxMBeanHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -45,6 +44,7 @@ import lombok.SneakyThrows;
 public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
 
   private static final String BOOTSTRAP_PATH_KEY = "rest.health-check.path";
+  private static final String BOOTSTRAP_CONNECTION_CHECK_KEY = "rest.health-check.connection-check";
 
   private static final String ACCEPTED_FILTER = "GET";
 
@@ -53,11 +53,19 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
   private static final String ADAPTER_OBJ_TYPE_WILD = "com.adaptris:type=Adapter,*";
 
   private static final String UNIQUE_ID = "UniqueId";
+  private static final String ID_KEY = "id";
 
   private static final String CHILDREN_ATTRIBUTE = "Children";
+  private static final String CHILD_RUNTIME_INFO_COMPONENTS_ATTRIBUTE = "ChildRuntimeInfoComponents";
+  private static final String TYPE_KEY = "type";
+  private static final String CONNECTION_TYPE = "Connection";
+  private static final String WORKFLOW_TYPE = "Workflow";
+  private static final String PARENT_TYPE_ADAPTER = "adapter";
+  private static final String PARENT_TYPE_CHANNEL = "channel";
+  private static final String PARENT_TYPE_WORKFLOW = "workflow";
 
   private static final String COMPONENT_STATE = "ComponentState";
-  
+
   private static final String AUTO_START = "AutoStart";
 
   private static final String PATH_KEY = JettyConstants.JETTY_URI;
@@ -87,6 +95,10 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
 
   @Getter(AccessLevel.PROTECTED)
   private transient final String defaultUrlPath = DEFAULT_PATH;
+
+  @Getter(AccessLevel.PACKAGE)
+  @Setter(AccessLevel.PACKAGE)
+  private transient boolean checkConnectionHealth = false;
 
   // maps the jettyURI metadata value into its appropriate behaviour.
   private final Map<String, RequestHandler> urlRoutes;
@@ -175,6 +187,10 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
     verifyReady(id, stateStr, handler);
     Set<ObjectName> channels = getJmxMBeanHelper().getObjectSetAttribute(objRef, CHILDREN_ATTRIBUTE);
     addChannelStates(report, channels, handler);
+    if (isCheckConnectionHealth()) {
+      Set<ObjectName> connections = getJmxMBeanHelper().getObjectSetAttribute(objRef, CHILD_RUNTIME_INFO_COMPONENTS_ATTRIBUTE);
+      addConnectionStates(report, connections, handler, PARENT_TYPE_ADAPTER, id);
+    }
     return report;
   }
 
@@ -188,21 +204,52 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
       ChannelState report = new ChannelState().withId(id).withState(stateStr);
       if(autoStart) { // ignore channels and their children if not auto-start=true
         verifyReady(id, stateStr, handler);
+        if (isCheckConnectionHealth()) {
+          Set<ObjectName> connections = getJmxMBeanHelper().getObjectSetAttribute(objRef, CHILD_RUNTIME_INFO_COMPONENTS_ATTRIBUTE);
+          addConnectionStates(adapterState, connections, handler, PARENT_TYPE_CHANNEL, id);
+        }
         Set<ObjectName> workflows = getJmxMBeanHelper().getObjectSetAttribute(objRef, CHILDREN_ATTRIBUTE);
-        addWorkflowStates(report, workflows, handler);
+        addWorkflowStates(adapterState, report, workflows, handler);
         adapterState.applyDefaultIfNull().add(report);
       }
     }
   }
 
-  private void addWorkflowStates(ChannelState channelState, Set<ObjectName> namedWorkflows, IfNotReady handler) throws Exception {
+  private void addWorkflowStates(AdapterState adapterState, ChannelState channelState, Set<ObjectName> namedWorkflows,
+      IfNotReady handler) throws Exception {
     for (ObjectName workflow : namedWorkflows) {
+      // Channel children can include runtime info components (for example connection monitors).
+      // Only workflow ObjectNames should be processed in this block.
+      if (!WORKFLOW_TYPE.equals(workflow.getKeyProperty(TYPE_KEY))) {
+        continue;
+      }
       String objRef = workflow.toString();
       String id = getJmxMBeanHelper().getStringAttribute(objRef, UNIQUE_ID);
       String stateStr = getJmxMBeanHelper().getStringAttributeClassName(objRef, COMPONENT_STATE);
       WorkflowState report = new WorkflowState().withId(id).withState(stateStr);
       verifyReady(id, stateStr, handler);
+      if (isCheckConnectionHealth()) {
+        Set<ObjectName> connections = getJmxMBeanHelper().getObjectSetAttribute(objRef, CHILD_RUNTIME_INFO_COMPONENTS_ATTRIBUTE);
+        addConnectionStates(adapterState, connections, handler, PARENT_TYPE_WORKFLOW, id);
+      }
       channelState.applyDefaultIfNull().add(report);
+    }
+  }
+
+  private void addConnectionStates(AdapterState adapterState, Set<ObjectName> connections, IfNotReady handler, String parentType,
+      String parentId) throws Exception {
+    for (ObjectName connectionName : connections) {
+      if (!CONNECTION_TYPE.equals(connectionName.getKeyProperty(TYPE_KEY))) {
+        continue;
+      }
+      String objRef = connectionName.toString();
+      String id = connectionName.getKeyProperty(ID_KEY);
+      String stateStr = getJmxMBeanHelper().getStringAttributeClassName(objRef, COMPONENT_STATE);
+      ConnectionState report = new ConnectionState();
+      report.withId(id).withState(stateStr);
+      report.withParentType(parentType).withParentId(parentId);
+      verifyReady(id, stateStr, handler);
+      adapterState.applyConnectionDefaultIfNull().add(report);
     }
   }
 
@@ -218,6 +265,7 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
   public void init(Properties config) throws Exception {
     super.init(config);
     setConfiguredUrlPath(config.getProperty(BOOTSTRAP_PATH_KEY));
+    setCheckConnectionHealth(BooleanUtils.toBoolean(config.getProperty(BOOTSTRAP_CONNECTION_CHECK_KEY)));
   }
 
   // What to do if the component isn't ready.
