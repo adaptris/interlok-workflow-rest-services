@@ -62,6 +62,8 @@ public class WorkflowHealthCheckComponentTest {
   private static final String CONNECTION_OBJECT_NAME_ADAPTER = "com.adaptris:type=Connection,adapter=" + ADAPTER_ID + ",id=" + CONNECTION_ID_ADAPTER;
   private static final String CONNECTION_OBJECT_NAME_CHANNEL = "com.adaptris:type=Connection,adapter=" + ADAPTER_ID + ",channel=" + CHANNEL_ID + ",id=" + CONNECTION_ID_CHANNEL;
   private static final String CONNECTION_OBJECT_NAME_WORKFLOW = "com.adaptris:type=Connection,adapter=" + ADAPTER_ID + ",channel=" + CHANNEL_ID + ",workflow=" + WORKFLOW_ID1 + ",id=" + CONNECTION_ID_WORKFLOW;
+  private static final String NON_CONNECTION_ID = "NotAConnection";
+  private static final String NON_CONNECTION_OBJECT_NAME_ADAPTER = "com.adaptris:type=Service,adapter=" + ADAPTER_ID + ",id=" + NON_CONNECTION_ID;
   private static final String PATH_KEY = JettyConstants.JETTY_URI;
   private static final String CONNECTION_CHECK_KEY = "rest.health-check.connection-check";
 
@@ -346,6 +348,37 @@ public class WorkflowHealthCheckComponentTest {
       assertEquals(HttpURLConnection.HTTP_OK, testConsumer.httpStatus);
       assertTrue(testConsumer.payload.contains(WORKFLOW_ID1));
       assertFalse(testConsumer.payload.contains(WORKFLOW_ID2));
+    } finally {
+      wrapper.destroy();
+    }
+  }
+
+  @Test
+  public void testHealthCheck_IgnoresNonConnectionRuntimeComponents() throws Exception {
+    AdaptrisMessage message = AdaptrisMessageFactory.getDefaultInstance().newMessage();
+    message.addMessageHeader(PATH_KEY, "/workflow-health-check");
+    MockedHealthCheckWrapper wrapper = new MockedHealthCheckWrapper().build(true);
+    JmxMBeanHelper mockJmxHelper = wrapper.jmxHelper();
+    TestConsumer testConsumer = wrapper.testConsumer();
+
+    Set<ObjectName> mixedRuntimeComponents = new HashSet<>();
+    mixedRuntimeComponents.add(new ObjectName(CONNECTION_OBJECT_NAME_ADAPTER));
+    mixedRuntimeComponents.add(new ObjectName(NON_CONNECTION_OBJECT_NAME_ADAPTER));
+
+    when(mockJmxHelper.getObjectSetAttribute(new ObjectName("com.adaptris:type=Adapter,id=" + ADAPTER_ID).toString(),
+        CHILD_RUNTIME_INFO_COMPONENTS_ATTRIBUTE)).thenReturn(mixedRuntimeComponents);
+
+    try {
+      Properties p = new Properties();
+      p.setProperty(CONNECTION_CHECK_KEY, "true");
+      wrapper.start(p);
+      wrapper.healthCheck().onAdaptrisMessage(message);
+
+      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS).until(testConsumer::complete);
+      assertFalse(testConsumer.isError);
+      assertEquals(HttpURLConnection.HTTP_OK, testConsumer.httpStatus);
+      assertTrue(testConsumer.payload.contains(CONNECTION_ID_ADAPTER));
+      assertFalse(testConsumer.payload.contains(NON_CONNECTION_ID));
     } finally {
       wrapper.destroy();
     }
