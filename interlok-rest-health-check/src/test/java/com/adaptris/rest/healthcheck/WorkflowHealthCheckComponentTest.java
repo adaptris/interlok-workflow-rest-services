@@ -58,12 +58,14 @@ public class WorkflowHealthCheckComponentTest {
   
   private static final String CHANNEL_OBJECT_NAME = "com.adaptris:type=Channel,adapter=" + ADAPTER_ID + ",id=" + CHANNEL_ID;
   private static final String WORKFLOW_OBJECT_NAME_1 = "com.adaptris:type=Workflow,adapter=" + ADAPTER_ID + ",channel=" + CHANNEL_ID + ",id=" + WORKFLOW_ID1;
-  private static final String WORKFLOW_OBJECT_NAME_2 = "com.adaptris:type=Channel,adapter=" + ADAPTER_ID + ",channel=" + CHANNEL_ID + ",id=" + WORKFLOW_ID2;
+  private static final String WORKFLOW_OBJECT_NAME_2 = "com.adaptris:type=Workflow,adapter=" + ADAPTER_ID + ",channel=" + CHANNEL_ID + ",id=" + WORKFLOW_ID2;
   private static final String CONNECTION_OBJECT_NAME_ADAPTER = "com.adaptris:type=Connection,adapter=" + ADAPTER_ID + ",id=" + CONNECTION_ID_ADAPTER;
   private static final String CONNECTION_OBJECT_NAME_CHANNEL = "com.adaptris:type=Connection,adapter=" + ADAPTER_ID + ",channel=" + CHANNEL_ID + ",id=" + CONNECTION_ID_CHANNEL;
   private static final String CONNECTION_OBJECT_NAME_WORKFLOW = "com.adaptris:type=Connection,adapter=" + ADAPTER_ID + ",channel=" + CHANNEL_ID + ",workflow=" + WORKFLOW_ID1 + ",id=" + CONNECTION_ID_WORKFLOW;
   private static final String NON_CONNECTION_ID = "NotAConnection";
   private static final String NON_CONNECTION_OBJECT_NAME_ADAPTER = "com.adaptris:type=Service,adapter=" + ADAPTER_ID + ",id=" + NON_CONNECTION_ID;
+  private static final String NON_WORKFLOW_CHILD_ID = "NotAWorkflow";
+  private static final String NON_WORKFLOW_CHILD_OBJECT_NAME = "com.adaptris:type=Channel,adapter=" + ADAPTER_ID + ",channel=" + CHANNEL_ID + ",id=" + NON_WORKFLOW_CHILD_ID;
   private static final String PATH_KEY = JettyConstants.JETTY_URI;
   private static final String CONNECTION_CHECK_KEY = "rest.health-check.connection-check";
 
@@ -162,7 +164,7 @@ public class WorkflowHealthCheckComponentTest {
       assertTrue(testConsumer.payload.contains(ADAPTER_ID));
       assertTrue(testConsumer.payload.contains(CHANNEL_ID));
       assertTrue(testConsumer.payload.contains(WORKFLOW_ID1));
-      assertFalse(testConsumer.payload.contains(WORKFLOW_ID2));
+      assertTrue(testConsumer.payload.contains(WORKFLOW_ID2));
     } finally {
       wrapper.destroy();
     }
@@ -208,7 +210,7 @@ public class WorkflowHealthCheckComponentTest {
       assertTrue(testConsumer.payload.contains(ADAPTER_ID));
       assertTrue(testConsumer.payload.contains(CHANNEL_ID));
       assertTrue(testConsumer.payload.contains(WORKFLOW_ID1));
-      assertFalse(testConsumer.payload.contains(WORKFLOW_ID2));
+      assertTrue(testConsumer.payload.contains(WORKFLOW_ID2));
     } finally {
       wrapper.destroy();
     }
@@ -278,7 +280,7 @@ public class WorkflowHealthCheckComponentTest {
     TestConsumer testConsumer = wrapper.testConsumer();
     JmxMBeanHelper mockJmxHelper = wrapper.jmxHelper();
     try {
-      when(mockJmxHelper.getStringAttributeClassName(CONNECTION_OBJECT_NAME_ADAPTER, COMPONENT_STATE))
+      when(mockJmxHelper.getStringAttributeClassName(new ObjectName(CONNECTION_OBJECT_NAME_ADAPTER).toString(), COMPONENT_STATE))
           .thenReturn(StoppedState.class.getSimpleName());
 
       Properties p = new Properties();
@@ -330,9 +332,9 @@ public class WorkflowHealthCheckComponentTest {
 
     Set<ObjectName> mixedChildren = new HashSet<>();
     ObjectName workflowObjectName1 = new ObjectName(WORKFLOW_OBJECT_NAME_1);
-    ObjectName workflowConnection = new ObjectName(CONNECTION_OBJECT_NAME_WORKFLOW);
+    ObjectName nonWorkflowChild = new ObjectName(NON_WORKFLOW_CHILD_OBJECT_NAME);
     mixedChildren.add(workflowObjectName1);
-    mixedChildren.add(workflowConnection);
+    mixedChildren.add(nonWorkflowChild);
 
     when(mockJmxHelper.getObjectSetAttribute(new ObjectName(CHANNEL_OBJECT_NAME).toString(), CHILDREN_ATTRIBUTE))
         .thenReturn(mixedChildren);
@@ -347,7 +349,7 @@ public class WorkflowHealthCheckComponentTest {
       assertFalse(testConsumer.isError);
       assertEquals(HttpURLConnection.HTTP_OK, testConsumer.httpStatus);
       assertTrue(testConsumer.payload.contains(WORKFLOW_ID1));
-      assertFalse(testConsumer.payload.contains(WORKFLOW_ID2));
+      assertFalse(testConsumer.payload.contains(NON_WORKFLOW_CHILD_ID));
     } finally {
       wrapper.destroy();
     }
