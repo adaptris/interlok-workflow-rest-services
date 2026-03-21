@@ -1,5 +1,10 @@
 package com.adaptris.rest.healthcheck;
 
+import static com.adaptris.rest.WorkflowServicesConsumer.CONTENT_TYPE_JSON;
+import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_DEFAULT;
+import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_NOT_READY;
+import static com.adaptris.rest.WorkflowServicesConsumer.OK_200;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,11 +33,6 @@ import com.adaptris.core.StoppedState;
 import com.adaptris.core.XStreamJsonMarshaller;
 import com.adaptris.core.http.jetty.JettyConstants;
 import com.adaptris.rest.AbstractRestfulEndpoint;
-
-import static com.adaptris.rest.WorkflowServicesConsumer.CONTENT_TYPE_JSON;
-import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_DEFAULT;
-import static com.adaptris.rest.WorkflowServicesConsumer.ERROR_NOT_READY;
-import static com.adaptris.rest.WorkflowServicesConsumer.OK_200;
 
 import com.adaptris.rest.util.JmxMBeanHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
