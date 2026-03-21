@@ -33,7 +33,6 @@ import com.adaptris.core.StoppedState;
 import com.adaptris.core.XStreamJsonMarshaller;
 import com.adaptris.core.http.jetty.JettyConstants;
 import com.adaptris.rest.AbstractRestfulEndpoint;
-
 import com.adaptris.rest.util.JmxMBeanHelper;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
