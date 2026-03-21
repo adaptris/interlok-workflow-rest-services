@@ -10,22 +10,22 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ConnectionState extends State {
 
-	@Getter
-	@Setter
-	private String parentType;
+  @Getter
+  @Setter
+  private String parentType;
 
-	@Getter
-	@Setter
-	private String parentId;
+  @Getter
+  @Setter
+  private String parentId;
 
-	public ConnectionState withParentType(String parentType) {
-		setParentType(parentType);
-		return this;
-	}
+  public ConnectionState withParentType(String parentType) {
+    setParentType(parentType);
+    return this;
+  }
 
-	public ConnectionState withParentId(String parentId) {
-		setParentId(parentId);
-		return this;
-	}
+  public ConnectionState withParentId(String parentId) {
+    setParentId(parentId);
+    return this;
+  }
 
 }
