@@ -273,7 +273,7 @@ public class WorkflowHealthCheckComponentTest {
   }
 
   @Test
-  public void testReadiness_NotReadyWhenConnectionStopped() throws Exception {
+  void testReadiness_NotReadyWhenConnectionStopped() throws Exception {
     AdaptrisMessage message = AdaptrisMessageFactory.getDefaultInstance().newMessage();
     message.addMessageHeader(PATH_KEY, "/workflow-health-check/ready");
     MockedHealthCheckWrapper wrapper = new MockedHealthCheckWrapper().build(true);
@@ -297,7 +297,7 @@ public class WorkflowHealthCheckComponentTest {
   }
 
   @Test
-  public void testHealthCheck_ConnectionParentsIncluded() throws Exception {
+  void testHealthCheck_ConnectionParentsIncluded() throws Exception {
     AdaptrisMessage message = AdaptrisMessageFactory.getDefaultInstance().newMessage();
     message.addMessageHeader(PATH_KEY, "/workflow-health-check");
     MockedHealthCheckWrapper wrapper = new MockedHealthCheckWrapper().build(true);
@@ -323,7 +323,7 @@ public class WorkflowHealthCheckComponentTest {
   }
 
   @Test
-  public void testHealthCheck_IgnoresNonWorkflowChildren() throws Exception {
+  void testHealthCheck_IgnoresNonWorkflowChildren() throws Exception {
     AdaptrisMessage message = AdaptrisMessageFactory.getDefaultInstance().newMessage();
     message.addMessageHeader(PATH_KEY, "/workflow-health-check");
     MockedHealthCheckWrapper wrapper = new MockedHealthCheckWrapper().build(true);
@@ -356,7 +356,7 @@ public class WorkflowHealthCheckComponentTest {
   }
 
   @Test
-  public void testHealthCheck_IgnoresNonConnectionRuntimeComponents() throws Exception {
+  void testHealthCheck_IgnoresNonConnectionRuntimeComponents() throws Exception {
     AdaptrisMessage message = AdaptrisMessageFactory.getDefaultInstance().newMessage();
     message.addMessageHeader(PATH_KEY, "/workflow-health-check");
     MockedHealthCheckWrapper wrapper = new MockedHealthCheckWrapper().build(true);
