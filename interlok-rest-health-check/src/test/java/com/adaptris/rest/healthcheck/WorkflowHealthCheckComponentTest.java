@@ -49,13 +49,21 @@ public class WorkflowHealthCheckComponentTest {
   private static final String WORKFLOW_ID2 = "MyWorkflowId2";
   private static final String UNIQUE_ID = "UniqueId";
   private static final String CHILDREN_ATTRIBUTE = "Children";
+  private static final String CHILD_RUNTIME_INFO_COMPONENTS_ATTRIBUTE = "ChildRuntimeInfoComponents";
   private static final String COMPONENT_STATE = "ComponentState";
   private static final String AUTO_START = "AutoStart";
+  private static final String CONNECTION_ID_ADAPTER = "AdapterConnection";
+  private static final String CONNECTION_ID_CHANNEL = "ChannelConnection";
+  private static final String CONNECTION_ID_WORKFLOW = "WorkflowConnection";
   
   private static final String CHANNEL_OBJECT_NAME = "com.adaptris:type=Channel,adapter=" + ADAPTER_ID + ",id=" + CHANNEL_ID;
   private static final String WORKFLOW_OBJECT_NAME_1 = "com.adaptris:type=Workflow,adapter=" + ADAPTER_ID + ",channel=" + CHANNEL_ID + ",id=" + WORKFLOW_ID1;
   private static final String WORKFLOW_OBJECT_NAME_2 = "com.adaptris:type=Channel,adapter=" + ADAPTER_ID + ",channel=" + CHANNEL_ID + ",id=" + WORKFLOW_ID2;
+  private static final String CONNECTION_OBJECT_NAME_ADAPTER = "com.adaptris:type=Connection,adapter=" + ADAPTER_ID + ",id=" + CONNECTION_ID_ADAPTER;
+  private static final String CONNECTION_OBJECT_NAME_CHANNEL = "com.adaptris:type=Connection,adapter=" + ADAPTER_ID + ",channel=" + CHANNEL_ID + ",id=" + CONNECTION_ID_CHANNEL;
+  private static final String CONNECTION_OBJECT_NAME_WORKFLOW = "com.adaptris:type=Connection,adapter=" + ADAPTER_ID + ",channel=" + CHANNEL_ID + ",workflow=" + WORKFLOW_ID1 + ",id=" + CONNECTION_ID_WORKFLOW;
   private static final String PATH_KEY = JettyConstants.JETTY_URI;
+  private static final String CONNECTION_CHECK_KEY = "rest.health-check.connection-check";
 
   @Test
   public void testMarshalling() throws Exception {
@@ -152,7 +160,7 @@ public class WorkflowHealthCheckComponentTest {
       assertTrue(testConsumer.payload.contains(ADAPTER_ID));
       assertTrue(testConsumer.payload.contains(CHANNEL_ID));
       assertTrue(testConsumer.payload.contains(WORKFLOW_ID1));
-      assertTrue(testConsumer.payload.contains(WORKFLOW_ID2));
+      assertFalse(testConsumer.payload.contains(WORKFLOW_ID2));
     } finally {
       wrapper.destroy();
     }
@@ -198,7 +206,7 @@ public class WorkflowHealthCheckComponentTest {
       assertTrue(testConsumer.payload.contains(ADAPTER_ID));
       assertTrue(testConsumer.payload.contains(CHANNEL_ID));
       assertTrue(testConsumer.payload.contains(WORKFLOW_ID1));
-      assertTrue(testConsumer.payload.contains(WORKFLOW_ID2));
+      assertFalse(testConsumer.payload.contains(WORKFLOW_ID2));
     } finally {
       wrapper.destroy();
     }
@@ -260,6 +268,89 @@ public class WorkflowHealthCheckComponentTest {
     }
   }
 
+  @Test
+  public void testReadiness_NotReadyWhenConnectionStopped() throws Exception {
+    AdaptrisMessage message = AdaptrisMessageFactory.getDefaultInstance().newMessage();
+    message.addMessageHeader(PATH_KEY, "/workflow-health-check/ready");
+    MockedHealthCheckWrapper wrapper = new MockedHealthCheckWrapper().build(true);
+    TestConsumer testConsumer = wrapper.testConsumer();
+    JmxMBeanHelper mockJmxHelper = wrapper.jmxHelper();
+    try {
+      when(mockJmxHelper.getStringAttributeClassName(CONNECTION_OBJECT_NAME_ADAPTER, COMPONENT_STATE))
+          .thenReturn(StoppedState.class.getSimpleName());
+
+      Properties p = new Properties();
+      p.setProperty(CONNECTION_CHECK_KEY, "true");
+      wrapper.start(p);
+      wrapper.healthCheck().onAdaptrisMessage(message);
+
+      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS).until(testConsumer::complete);
+      assertEquals(HttpURLConnection.HTTP_UNAVAILABLE, testConsumer.httpStatus);
+      assertTrue(testConsumer.payload.contains("is not started"));
+    } finally {
+      wrapper.destroy();
+    }
+  }
+
+  @Test
+  public void testHealthCheck_ConnectionParentsIncluded() throws Exception {
+    AdaptrisMessage message = AdaptrisMessageFactory.getDefaultInstance().newMessage();
+    message.addMessageHeader(PATH_KEY, "/workflow-health-check");
+    MockedHealthCheckWrapper wrapper = new MockedHealthCheckWrapper().build(true);
+    TestConsumer testConsumer = wrapper.testConsumer();
+    try {
+      Properties p = new Properties();
+      p.setProperty(CONNECTION_CHECK_KEY, "true");
+      wrapper.start(p);
+      wrapper.healthCheck().onAdaptrisMessage(message);
+
+      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS).until(testConsumer::complete);
+      assertFalse(testConsumer.isError);
+      assertTrue(testConsumer.payload.contains("\"connection-states\""));
+      assertTrue(testConsumer.payload.contains("\"parent-type\":\"adapter\""));
+      assertTrue(testConsumer.payload.contains("\"parent-id\":\"" + ADAPTER_ID + "\""));
+      assertTrue(testConsumer.payload.contains("\"parent-type\":\"channel\""));
+      assertTrue(testConsumer.payload.contains("\"parent-id\":\"" + CHANNEL_ID + "\""));
+      assertTrue(testConsumer.payload.contains("\"parent-type\":\"workflow\""));
+      assertTrue(testConsumer.payload.contains("\"parent-id\":\"" + WORKFLOW_ID1 + "\""));
+    } finally {
+      wrapper.destroy();
+    }
+  }
+
+  @Test
+  public void testHealthCheck_IgnoresNonWorkflowChildren() throws Exception {
+    AdaptrisMessage message = AdaptrisMessageFactory.getDefaultInstance().newMessage();
+    message.addMessageHeader(PATH_KEY, "/workflow-health-check");
+    MockedHealthCheckWrapper wrapper = new MockedHealthCheckWrapper().build(true);
+    JmxMBeanHelper mockJmxHelper = wrapper.jmxHelper();
+    TestConsumer testConsumer = wrapper.testConsumer();
+
+    Set<ObjectName> mixedChildren = new HashSet<>();
+    ObjectName workflowObjectName1 = new ObjectName(WORKFLOW_OBJECT_NAME_1);
+    ObjectName workflowConnection = new ObjectName(CONNECTION_OBJECT_NAME_WORKFLOW);
+    mixedChildren.add(workflowObjectName1);
+    mixedChildren.add(workflowConnection);
+
+    when(mockJmxHelper.getObjectSetAttribute(new ObjectName(CHANNEL_OBJECT_NAME).toString(), CHILDREN_ATTRIBUTE))
+        .thenReturn(mixedChildren);
+
+    try {
+      Properties p = new Properties();
+      p.setProperty(CONNECTION_CHECK_KEY, "true");
+      wrapper.start(p);
+      wrapper.healthCheck().onAdaptrisMessage(message);
+
+      await().atMost(Durations.FIVE_SECONDS).with().pollInterval(Durations.ONE_HUNDRED_MILLISECONDS).until(testConsumer::complete);
+      assertFalse(testConsumer.isError);
+      assertEquals(HttpURLConnection.HTTP_OK, testConsumer.httpStatus);
+      assertTrue(testConsumer.payload.contains(WORKFLOW_ID1));
+      assertFalse(testConsumer.payload.contains(WORKFLOW_ID2));
+    } finally {
+      wrapper.destroy();
+    }
+  }
+
   // Can't do this in @BeforeEach / @AfterEach since I want to control the mocking behaviour.
   private class MockedHealthCheckWrapper {
 
@@ -289,16 +380,32 @@ public class WorkflowHealthCheckComponentTest {
       workflowObjectNames.add(workflowObjectName1);
       workflowObjectNames.add(workflowObjectName2);
 
+      Set<ObjectName> adapterConnectionObjectNames = new HashSet<>();
+      ObjectName adapterConnection = new ObjectName(CONNECTION_OBJECT_NAME_ADAPTER);
+      adapterConnectionObjectNames.add(adapterConnection);
+
+      Set<ObjectName> channelConnectionObjectNames = new HashSet<>();
+      ObjectName channelConnection = new ObjectName(CONNECTION_OBJECT_NAME_CHANNEL);
+      channelConnectionObjectNames.add(channelConnection);
+
+      Set<ObjectName> workflowConnectionObjectNames = new HashSet<>();
+      ObjectName workflowConnection = new ObjectName(CONNECTION_OBJECT_NAME_WORKFLOW);
+      workflowConnectionObjectNames.add(workflowConnection);
+
       when(mockJmxHelper.getMBeans(anyString())).thenReturn(adapterInstances);
       when(mockJmxHelper.getStringAttribute(adapterObjectName.toString(), UNIQUE_ID)).thenReturn(ADAPTER_ID);
       when(mockJmxHelper.getStringAttributeClassName(adapterObjectName.toString(), COMPONENT_STATE))
           .thenReturn(StartedState.class.getSimpleName());
 
       when(mockJmxHelper.getObjectSetAttribute(adapterObjectName.toString(), CHILDREN_ATTRIBUTE)).thenReturn(channelObjectNames);
+        when(mockJmxHelper.getObjectSetAttribute(adapterObjectName.toString(), CHILD_RUNTIME_INFO_COMPONENTS_ATTRIBUTE))
+          .thenReturn(adapterConnectionObjectNames);
       when(mockJmxHelper.getStringAttribute(channelObjectName.toString(), UNIQUE_ID)).thenReturn(CHANNEL_ID);
       when(mockJmxHelper.getStringAttribute(channelObjectName.toString(), AUTO_START)).thenReturn("true");
       when(mockJmxHelper.getStringAttributeClassName(channelObjectName.toString(), COMPONENT_STATE))
           .thenReturn(StartedState.class.getSimpleName());
+        when(mockJmxHelper.getObjectSetAttribute(channelObjectName.toString(), CHILD_RUNTIME_INFO_COMPONENTS_ATTRIBUTE))
+          .thenReturn(channelConnectionObjectNames);
 
       when(mockJmxHelper.getObjectSetAttribute(channelObjectName.toString(), CHILDREN_ATTRIBUTE)).thenReturn(workflowObjectNames);
 
@@ -309,9 +416,25 @@ public class WorkflowHealthCheckComponentTest {
 
       when(mockJmxHelper.getStringAttribute(workflowObjectName1.toString(), UNIQUE_ID)).thenReturn(WORKFLOW_ID1);
       when(mockJmxHelper.getStringAttributeClassName(workflowObjectName1.toString(), COMPONENT_STATE)).thenReturn(workflowState);
+        when(mockJmxHelper.getObjectSetAttribute(workflowObjectName1.toString(), CHILD_RUNTIME_INFO_COMPONENTS_ATTRIBUTE))
+          .thenReturn(workflowConnectionObjectNames);
 
       when(mockJmxHelper.getStringAttribute(workflowObjectName2.toString(), UNIQUE_ID)).thenReturn(WORKFLOW_ID2);
       when(mockJmxHelper.getStringAttributeClassName(workflowObjectName2.toString(), COMPONENT_STATE)).thenReturn(workflowState);
+        when(mockJmxHelper.getObjectSetAttribute(workflowObjectName2.toString(), CHILD_RUNTIME_INFO_COMPONENTS_ATTRIBUTE))
+          .thenReturn(Collections.emptySet());
+
+        when(mockJmxHelper.getStringAttribute(adapterConnection.toString(), UNIQUE_ID)).thenReturn(CONNECTION_ID_ADAPTER);
+        when(mockJmxHelper.getStringAttributeClassName(adapterConnection.toString(), COMPONENT_STATE))
+          .thenReturn(StartedState.class.getSimpleName());
+
+        when(mockJmxHelper.getStringAttribute(channelConnection.toString(), UNIQUE_ID)).thenReturn(CONNECTION_ID_CHANNEL);
+        when(mockJmxHelper.getStringAttributeClassName(channelConnection.toString(), COMPONENT_STATE))
+          .thenReturn(StartedState.class.getSimpleName());
+
+        when(mockJmxHelper.getStringAttribute(workflowConnection.toString(), UNIQUE_ID)).thenReturn(CONNECTION_ID_WORKFLOW);
+        when(mockJmxHelper.getStringAttributeClassName(workflowConnection.toString(), COMPONENT_STATE))
+          .thenReturn(StartedState.class.getSimpleName());
 
       healthCheck = new WorkflowHealthCheckComponent();
       testConsumer = new TestConsumer();
@@ -321,7 +444,11 @@ public class WorkflowHealthCheckComponentTest {
     }
 
     public void start() throws Exception {
-      healthCheck.init(new Properties());
+      start(new Properties());
+    }
+
+    public void start(Properties properties) throws Exception {
+      healthCheck.init(properties);
       healthCheck.start();
 
     }
