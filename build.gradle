@@ -4,10 +4,10 @@ import org.apache.tools.ant.filters.*
 plugins {
   // Manage optional dependencies in maven pom.
   id "nebula.optional-base" version "7.0.0"  apply false
-  id "com.github.spotbugs" version "6.0.27" apply false
-  id "org.sonarqube" version "6.0.1.5171"
-  id "io.freefair.lombok" version "8.11" apply false
-  id "org.owasp.dependencycheck" version "11.1.1" apply false
+  id "com.github.spotbugs" version "6.5.4" apply false
+  id "org.sonarqube" version "6.3.1.5724"
+  id "io.freefair.lombok" version "8.14.2" apply false
+  id "org.owasp.dependencycheck" version "12.2.2" apply false
 }
 
 ext {
@@ -171,11 +171,12 @@ subprojects {
     annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion")
     umlDoclet("nl.talsmasoftware:umldoclet:2.1.0")
 
-    testImplementation ("org.junit.jupiter:junit-jupiter-engine:5.11.4")
+    testImplementation ("org.junit.jupiter:junit-jupiter-engine:5.13.4")
+    testImplementation ("org.junit.platform:junit-platform-launcher:1.13.3")
     testImplementation ("com.adaptris:interlok-stubs:$interlokCoreVersion") { changing=true }
     testImplementation ("org.mockito:mockito-core:$mockitoVersion")
     testImplementation ("org.mockito:mockito-inline:$mockitoVersion")
-    testImplementation ("org.awaitility:awaitility:4.2.2")
+    testImplementation ("org.awaitility:awaitility:4.3.0")
     // INTERLOK-3233 we still need log4j since we're doing MDC stuffs.
     testImplementation ("org.apache.logging.log4j:log4j-core:$log4j2Version")
     testImplementation ("org.apache.logging.log4j:log4j-api:$log4j2Version")
@@ -328,7 +329,11 @@ subprojects {
     }
     analyzers {
       assemblyEnabled=false
-      knownExploitedURL=project.findProperty('dependencyCheckKnownExploitedURL')
+      ossIndex {
+        username = System.getenv("OSS_INDEX_USERNAME")
+        password = System.getenv("OSS_INDEX_PASSWORD")
+        warnOnlyOnRemoteErrors = true
+      }
     }
   }
 
