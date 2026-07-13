@@ -172,7 +172,7 @@ subprojects {
     umlDoclet("nl.talsmasoftware:umldoclet:2.1.0")
 
     testImplementation ("org.junit.jupiter:junit-jupiter-engine:5.13.4")
-    testImplementation ("org.junit.platform:junit-platform-launcher:1.13.3")
+    testImplementation ("org.junit.platform:junit-platform-launcher:6.1.2")
     testImplementation ("com.adaptris:interlok-stubs:$interlokCoreVersion") { changing=true }
     testImplementation ("org.mockito:mockito-core:$mockitoVersion")
     testImplementation ("org.mockito:mockito-inline:$mockitoVersion")
