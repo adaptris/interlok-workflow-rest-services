@@ -317,7 +317,7 @@ subprojects {
   }
 
   dependencyCheck  {
-    suppressionFiles= [ "https://raw.githubusercontent.com/adaptris/interlok/develop/gradle/owasp-exclude.xml" ]
+    suppressionFiles= [ "https://raw.githubusercontent.com/adaptris/interlok/develop/gradle/owasp-exclude.xml", "$rootDir/gradle/owasp-exclude.xml" ]
     scanConfigurations = [ "api", "compileClasspath", "runtimeClasspath" ]
     formats = [ "HTML", "JUNIT" ]
     junitFailOnCVSS = 7.0
