@@ -122,7 +122,6 @@ subprojects {
 
   // In this section you declare where to find the dependencies of your project
   repositories {
-    mavenCentral()
     if (defaultNexusRepo != "unknown") {
       maven {
         url "$defaultNexusRepo"
@@ -131,6 +130,7 @@ subprojects {
     }
     maven { url "$nexusBaseUrl/content/groups/public" }
     maven { url "$nexusBaseUrl/content/groups/interlok" }
+    mavenCentral()
   }
 
   configurations {
