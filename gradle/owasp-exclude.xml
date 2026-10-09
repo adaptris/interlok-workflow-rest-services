@@ -9,4 +9,14 @@
     <cve>CVE-2026-54399</cve>
     <cve>CVE-2026-54428</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+      HdrHistogram 2.2.2 is pulled in via Micrometer and remains the latest published release.
+      These low-severity local-access findings are disputed; no patched release is available.
+      Revisit when an upstream fix is published and can be consumed via a minor/patch upgrade.
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.hdrhistogram/HdrHistogram@2\.2\.2$</packageUrl>
+    <cve>CVE-2026-14683</cve>
+    <cve>CVE-2026-14686</cve>
+  </suppress>
 </suppressions>
