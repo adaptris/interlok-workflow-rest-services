@@ -25,7 +25,7 @@ ext {
 
   organizationName = "Adaptris Ltd"
 
-  mockitoVersion = '4.9.0'
+  mockitoVersion = '5.2.0'
   log4j2Version = '2.24.3'
 }
 
