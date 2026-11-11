@@ -27,6 +27,11 @@ public class PrometheusEndpointComponent extends AbstractRestfulEndpoint {
 
   private static final String CONTENT_TYPE_DEFAULT = "text/plain";
 
+  /**
+   * Set to {@code false} to keep the metrics endpoint on the main Jetty instance even when {@value AbstractRestfulEndpoint#MANAGEMENT_PORT_KEY} is set.
+   */
+  public static final String BOOTSTRAP_MANAGEMENT_PORT_ENABLED_KEY = "rest.prometheus.management-port.enabled";
+
   private static final transient boolean ADDITIONAL_DEBUG = BooleanUtils
       .toBoolean(System.getProperty("interlok.prometheus.debug", "false"));
 
@@ -40,8 +45,11 @@ public class PrometheusEndpointComponent extends AbstractRestfulEndpoint {
 
   @Override
   public void init(Properties config) throws Exception {
+    super.init(config);
     prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
     prometheusRegistry.config().meterFilter(new PrometheusRenameFilter());
+    // after the registry, so that stop() is still safe if this throws.
+    setConfiguredPort(managementPort(config, BOOTSTRAP_MANAGEMENT_PORT_ENABLED_KEY));
   }
 
   @Override

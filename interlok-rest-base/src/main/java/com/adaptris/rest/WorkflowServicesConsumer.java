@@ -49,6 +49,17 @@ public abstract class WorkflowServicesConsumer implements ComponentLifecycle, Co
   @Setter
   private String acceptedHttpMethods;
 
+  /**
+   * The dedicated management port to listen on, if any.
+   * <p>
+   * If {@code null} (the default) then requests are received via the main embedded Jetty instance; otherwise via a dedicated Jetty
+   * server listening on this port. Implementations may choose to ignore this.
+   * </p>
+   */
+  @Getter
+  @Setter
+  private Integer port;
+
   protected abstract StandaloneConsumer configureConsumer(AdaptrisMessageListener messageListener, String consumedUrlPath,
       String acceptedHttpMethods);
 
