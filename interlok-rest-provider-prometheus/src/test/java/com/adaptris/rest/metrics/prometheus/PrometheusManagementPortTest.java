@@ -18,6 +18,10 @@ import com.adaptris.interlok.junit.scaffolding.util.PortManager;
 import com.adaptris.rest.HttpHelper;
 import com.adaptris.rest.MockWorkflowConsumer;
 
+/**
+ * Tests for serving Prometheus metrics on the dedicated management port, and for staying on the main Jetty port when not configured
+ * or opted out.
+ */
 public class PrometheusManagementPortTest {
 
   private Integer port;

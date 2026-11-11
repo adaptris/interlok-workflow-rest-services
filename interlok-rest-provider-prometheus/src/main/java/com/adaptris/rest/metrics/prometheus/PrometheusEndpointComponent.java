@@ -43,6 +43,12 @@ public class PrometheusEndpointComponent extends AbstractRestfulEndpoint {
 
   private PrometheusMeterRegistry prometheusRegistry;
 
+  /**
+   * Create the Prometheus registry and read {@value AbstractRestfulEndpoint#MANAGEMENT_PORT_KEY} and
+   * {@value #BOOTSTRAP_MANAGEMENT_PORT_ENABLED_KEY}.
+   *
+   * @throws IllegalArgumentException if {@value AbstractRestfulEndpoint#MANAGEMENT_PORT_KEY} is set but is not a valid port.
+   */
   @Override
   public void init(Properties config) throws Exception {
     super.init(config);

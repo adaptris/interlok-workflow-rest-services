@@ -58,6 +58,13 @@ public abstract class AbstractRestfulEndpoint extends MgmtComponentImpl implemen
   public void init(Properties config) throws Exception {
   }
 
+  /**
+   * Configure the consumer (accepted methods, URL path, management port and listener) and start it on a background thread.
+   * <p>
+   * Failures to start, such as the management port already being in use, are logged rather than thrown, so they don't prevent the
+   * adapter from starting.
+   * </p>
+   */
   @Override
   public void start() throws Exception {
     AbstractRestfulEndpoint instance = this;
@@ -113,6 +120,14 @@ public abstract class AbstractRestfulEndpoint extends MgmtComponentImpl implemen
     return BooleanUtils.toBoolean(config.getProperty(componentEnabledKey, "true")) ? port : null;
   }
 
+  /**
+   * Parse a port number from a property value.
+   *
+   * @param key the property name, used in the error message.
+   * @param value the raw value; surrounding whitespace is ignored.
+   * @return the port, or {@code null} if the value is null or blank.
+   * @throws IllegalArgumentException if the value is not an integer between 1 and 65535.
+   */
   static Integer parsePort(String key, String value) {
     if (StringUtils.isBlank(value)) {
       return null;

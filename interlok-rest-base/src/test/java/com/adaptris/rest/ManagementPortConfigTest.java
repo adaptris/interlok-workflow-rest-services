@@ -10,6 +10,9 @@ import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests for resolving {@link AbstractRestfulEndpoint#MANAGEMENT_PORT_KEY} and a component's opt-out flag.
+ */
 public class ManagementPortConfigTest {
 
   private static final String ENABLED_KEY = "rest.test.management-port.enabled";

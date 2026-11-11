@@ -17,6 +17,12 @@ public final class HttpHelper {
   private HttpHelper() {
   }
 
+  /**
+   * Perform a GET against {@code http://localhost:<port><path>}.
+   *
+   * @return the status, body, and the {@code Content-Type} and {@code Server} headers (if present).
+   * @throws IOException if nothing is listening, or the request fails.
+   */
   public static Response get(int port, String path) throws IOException, InterruptedException {
     HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path)).timeout(Duration.ofSeconds(10)).GET()
         .build();
