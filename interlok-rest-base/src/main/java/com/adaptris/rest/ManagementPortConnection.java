@@ -29,6 +29,9 @@ class ManagementPortConnection extends AdaptrisConnectionImp implements JettySer
   private transient boolean initialised;
   private transient boolean started;
 
+  /**
+   * @param port the dedicated management port; the server is shared with any other connection using the same port.
+   */
   ManagementPortConnection(int port) {
     super();
     this.port = port;
@@ -38,6 +41,10 @@ class ManagementPortConnection extends AdaptrisConnectionImp implements JettySer
   protected void prepareConnection() throws CoreException {
   }
 
+  /**
+   * Register with (and if necessary create) the shared server for {@link #getPort()}. Calling this more than once without an
+   * intervening {@link #closeConnection()} has no further effect.
+   */
   @Override
   protected void initConnection() throws CoreException {
     if (!initialised) {
@@ -46,6 +53,9 @@ class ManagementPortConnection extends AdaptrisConnectionImp implements JettySer
     }
   }
 
+  /**
+   * Start the shared server if it isn't already running; this is where a port conflict surfaces, as a {@link CoreException}.
+   */
   @Override
   protected void startConnection() throws CoreException {
     if (!started) {
@@ -54,6 +64,9 @@ class ManagementPortConnection extends AdaptrisConnectionImp implements JettySer
     }
   }
 
+  /**
+   * Release this connection's start; the shared server only stops once every connection using it has stopped.
+   */
   @Override
   protected void stopConnection() {
     if (started) {
@@ -62,6 +75,10 @@ class ManagementPortConnection extends AdaptrisConnectionImp implements JettySer
     }
   }
 
+  /**
+   * Stop (if still started) and release this connection's registration; the shared server is closed and the port released
+   * once the last connection using it is closed. Safe to call more than once, or without a prior init.
+   */
   @Override
   protected void closeConnection() {
     stopConnection();

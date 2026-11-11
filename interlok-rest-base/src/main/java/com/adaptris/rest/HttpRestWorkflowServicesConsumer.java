@@ -51,6 +51,13 @@ public class HttpRestWorkflowServicesConsumer extends WorkflowServicesConsumer {
     setOwner(ownerRef);
   }
 
+  /**
+   * Build the Jetty consumer for the given path and methods.
+   * <p>
+   * If {@link #getPort()} is {@code null} the consumer is attached to the main embedded Jetty instance via an
+   * {@link EmbeddedConnection}; otherwise to the dedicated management server on that port via a {@link ManagementPortConnection}.
+   * </p>
+   */
   @Override
   protected StandaloneConsumer configureConsumer(AdaptrisMessageListener messageListener, String consumedUrlPath,
       String acceptedHttpMethods) {

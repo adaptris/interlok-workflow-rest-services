@@ -30,6 +30,15 @@ final class ManagementServers {
   private ManagementServers() {
   }
 
+  /**
+   * Register a user of the management server on the given port, creating (prepare + init) the server if this is the first user.
+   * <p>
+   * The server is not listening until {@link #start(int)} is called. If creating the server fails, nothing is registered.
+   * </p>
+   *
+   * @param port the port.
+   * @throws CoreException if the server could not be created.
+   */
   static void init(int port) throws CoreException {
     synchronized (LOCK) {
       SharedServer server = SERVERS.get(port);
@@ -45,6 +54,15 @@ final class ManagementServers {
     }
   }
 
+  /**
+   * Start the management server on the given port if this is the first user to start it; this is where the port is bound.
+   * <p>
+   * If starting fails (e.g. the port is in use), the start is not counted, so a later call will try again.
+   * </p>
+   *
+   * @param port the port, which must have been initialised with {@link #init(int)}.
+   * @throws CoreException if the server was not initialised, or could not be started.
+   */
   static void start(int port) throws CoreException {
     synchronized (LOCK) {
       SharedServer server = lookup(port);
@@ -56,6 +74,14 @@ final class ManagementServers {
     }
   }
 
+  /**
+   * Release one start of the management server on the given port, stopping it (and releasing the port) when the last user stops.
+   * <p>
+   * Does nothing if there is no server on the port or it is not started.
+   * </p>
+   *
+   * @param port the port.
+   */
   static void stop(int port) {
     synchronized (LOCK) {
       SharedServer server = SERVERS.get(port);
@@ -69,6 +95,15 @@ final class ManagementServers {
     }
   }
 
+  /**
+   * Release one user of the management server on the given port; when the last user is released the server is stopped (if
+   * required), closed and removed, so a later {@link #init(int)} creates a new one.
+   * <p>
+   * Does nothing if there is no server on the port.
+   * </p>
+   *
+   * @param port the port.
+   */
   static void close(int port) {
     synchronized (LOCK) {
       SharedServer server = SERVERS.get(port);
@@ -83,12 +118,30 @@ final class ManagementServers {
     }
   }
 
+  /**
+   * Add a servlet to the management server on the given port.
+   * <p>
+   * Serialised with every other registry operation, because the underlying Jetty servlet handler is not safe for concurrent
+   * modification and several components may register at the same time.
+   * </p>
+   *
+   * @param port the port, which must have been initialised with {@link #init(int)}.
+   * @param wrapper the servlet and the path it is mapped to.
+   * @throws CoreException if there is no server on the port.
+   */
   static void addServlet(int port, ServletWrapper wrapper) throws CoreException {
     synchronized (LOCK) {
       lookup(port).connection.addServlet(wrapper);
     }
   }
 
+  /**
+   * Remove a servlet from the management server on the given port, leaving any other components' servlets in place.
+   *
+   * @param port the port, which must have been initialised with {@link #init(int)}.
+   * @param wrapper the servlet and path previously passed to {@link #addServlet(int, ServletWrapper)}.
+   * @throws CoreException if there is no server on the port.
+   */
   static void removeServlet(int port, ServletWrapper wrapper) throws CoreException {
     synchronized (LOCK) {
       lookup(port).connection.removeServlet(wrapper);
@@ -117,6 +170,10 @@ final class ManagementServers {
     return server;
   }
 
+  /**
+   * Build the standalone connection (and therefore Jetty server) for a port: plain HTTP, no security handler, and no
+   * {@code Server}/{@code X-Powered-By} headers.
+   */
   private static HttpConnection createConnection(int port) {
     HttpConnection connection = new HttpConnection();
     connection.setUniqueId("management-server-" + port);

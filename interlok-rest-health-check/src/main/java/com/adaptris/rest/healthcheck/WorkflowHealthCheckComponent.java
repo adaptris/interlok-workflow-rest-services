@@ -267,6 +267,12 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
     }
   }
 
+  /**
+   * Read the health-check bootstrap properties: {@code rest.health-check.path}, {@code rest.health-check.connection-check},
+   * {@value AbstractRestfulEndpoint#MANAGEMENT_PORT_KEY} and {@value #BOOTSTRAP_MANAGEMENT_PORT_ENABLED_KEY}.
+   *
+   * @throws IllegalArgumentException if {@value AbstractRestfulEndpoint#MANAGEMENT_PORT_KEY} is set but is not a valid port.
+   */
   @Override
   public void init(Properties config) throws Exception {
     super.init(config);

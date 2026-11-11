@@ -28,6 +28,9 @@ import com.adaptris.core.http.jetty.ServletWrapper;
 import com.adaptris.core.util.LifecycleHelper;
 import com.adaptris.interlok.junit.scaffolding.util.PortManager;
 
+/**
+ * Tests for the shared, reference-counted management servers, using {@link ManagementPortConnection} against real ports.
+ */
 public class ManagementServersTest {
 
   private Integer port;

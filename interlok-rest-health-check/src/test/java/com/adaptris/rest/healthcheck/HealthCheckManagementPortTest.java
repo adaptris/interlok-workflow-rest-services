@@ -25,6 +25,10 @@ import com.adaptris.core.StandaloneConsumer;
 import com.adaptris.interlok.junit.scaffolding.util.PortManager;
 import com.adaptris.rest.WorkflowServicesConsumer;
 
+/**
+ * Tests for serving the health-check on the dedicated management port, and for staying on the main Jetty port when not configured
+ * or opted out.
+ */
 public class HealthCheckManagementPortTest {
 
   private static final HttpClient CLIENT = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
