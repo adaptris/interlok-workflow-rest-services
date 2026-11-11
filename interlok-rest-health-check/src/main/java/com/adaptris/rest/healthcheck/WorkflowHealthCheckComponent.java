@@ -47,6 +47,11 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
   private static final String BOOTSTRAP_PATH_KEY = "rest.health-check.path";
   private static final String BOOTSTRAP_CONNECTION_CHECK_KEY = "rest.health-check.connection-check";
 
+  /**
+   * Set to {@code false} to keep the health check on the main Jetty instance even when {@value AbstractRestfulEndpoint#MANAGEMENT_PORT_KEY} is set.
+   */
+  public static final String BOOTSTRAP_MANAGEMENT_PORT_ENABLED_KEY = "rest.health-check.management-port.enabled";
+
   private static final String ACCEPTED_FILTER = "GET";
 
   private static final String DEFAULT_PATH = "/workflow-health-check/*";
@@ -266,6 +271,7 @@ public class WorkflowHealthCheckComponent extends AbstractRestfulEndpoint {
   public void init(Properties config) throws Exception {
     super.init(config);
     setConfiguredUrlPath(config.getProperty(BOOTSTRAP_PATH_KEY));
+    setConfiguredPort(managementPort(config, BOOTSTRAP_MANAGEMENT_PORT_ENABLED_KEY));
     setCheckConnectionHealth(BooleanUtils.toBoolean(config.getProperty(BOOTSTRAP_CONNECTION_CHECK_KEY)));
   }
 

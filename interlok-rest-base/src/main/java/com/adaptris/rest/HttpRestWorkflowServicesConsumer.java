@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.MDC;
 
+import com.adaptris.core.AdaptrisConnection;
 import com.adaptris.core.AdaptrisMessage;
 import com.adaptris.core.AdaptrisMessageListener;
 import com.adaptris.core.StandaloneConsumer;
@@ -56,7 +57,7 @@ public class HttpRestWorkflowServicesConsumer extends WorkflowServicesConsumer {
     setResponseService(new JettyResponseService().withResponseHeaderProvider(new NoOpResponseHeaderProvider())
         .withHttpStatus("%message{httpReplyStatus}").withContentType("%message{httpReplyContentType}"));
 
-    EmbeddedConnection jettyConnection = new EmbeddedConnection();
+    AdaptrisConnection jettyConnection = getPort() == null ? new EmbeddedConnection() : new ManagementPortConnection(getPort());
     JettyMessageConsumer messageConsumer = new JettyMessageConsumer() {
       @Override
       public AdaptrisMessage createMessage(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {

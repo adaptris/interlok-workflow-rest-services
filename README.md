@@ -24,6 +24,8 @@ managementComponents=jetty:jmx:health-check
 ```
 Optionally, you can also set the property named __rest.health-check.path__, which directly affects the REST API URL path.  The default value is; "__/workflow-health-check/*__".
 
+The health-check can also be served on its own port; see [Dedicated management port](#dedicated-management-port).
+
 ### Running
 
 There are 3 modes of operation a health-check, a liveness probe and a readiness probe.
@@ -120,6 +122,25 @@ Server: Jetty(9.4.29.v20200521)
 
 This returns a `200 OK` if all the channels and workflows are started; otherwise a `503 Unavailable` is returned. There is no response data in the event of a `200 OK`; in the event of a `503 Unavailable` only the first component that was "not-started" will be reported to shortcut response times.
 
+
+## Dedicated management port
+
+By default every REST management component is served by the main embedded Jetty instance (the "__jetty__" management component), alongside any HTTP consumers in your adapter. The __health-check__ and __metrics-provider-prometheus__ components can instead be served by a separate Jetty server on their own port, similar to Spring Boot's `management.server.port`:
+
+```
+rest.management.port=8081
+```
+
+* If __rest.management.port__ is not set (or is blank), nothing changes.
+* If it is set, it must be a port number between 1 and 65535; otherwise the component fails to initialise.
+* All components using it share a single server on that port. Their URL paths are unchanged, and they are no longer available on the main Jetty port.
+* Each component can opt out and stay on the main Jetty port:
+  * __rest.health-check.management-port.enabled=false__
+  * __rest.prometheus.management-port.enabled=false__
+
+  Anything other than a "true" value (true/yes/on) counts as opting out.
+
+The dedicated server is a plain Jetty server. It does not use the main server's jetty.xml settings, and it does not inherit any `security-handler` configured on an adapter's `jetty-embedded-connection`. If the port is already in use, an error is logged and that component is not available.
 
 ## Cluster Manager
 
