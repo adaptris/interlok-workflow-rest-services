@@ -11,8 +11,10 @@ plugins {
 }
 
 ext {
-  interlokCoreVersion = project.findProperty('interlokCoreVersion') ?: '5.0-SNAPSHOT'
-  releaseVersion = project.findProperty('releaseVersion') ?: '5.0-SNAPSHOT'
+  interlokCatalogVersion = project.findProperty('interlokCatalogVersion') ?: '5.0-SNAPSHOT'
+  interlokCatalogPlatform = "com.adaptris:interlok-version-catalog:${interlokCatalogVersion}"
+  interlokCoreVersion = project.findProperty('interlokCoreVersion') ?: interlokCatalogVersion
+  releaseVersion = project.findProperty('releaseVersion') ?: interlokCatalogVersion
   nexusBaseUrl = project.findProperty('nexusBaseUrl') ?: 'https://nexus.adaptris.net/nexus'
   mavenPublishUrl = project.findProperty('mavenPublishUrl') ?: nexusBaseUrl + '/content/repositories/snapshots'
   javadocsBaseUrl = nexusBaseUrl + "/content/sites/javadocs/com/adaptris"
@@ -25,8 +27,6 @@ ext {
 
   organizationName = "Adaptris Ltd"
 
-  mockitoVersion = '4.9.0'
-  log4j2Version = '2.24.3'
 }
 
 ext.hostname = { ->
@@ -162,30 +162,41 @@ subprojects {
 
   // In this section you declare the dependencies for your production and test code
   dependencies {
-    api ("com.adaptris:interlok-core:$interlokCoreVersion") {changing = true}
-    api ("com.adaptris:interlok-common:$interlokCoreVersion") {changing = true}
+    api platform(interlokCatalogPlatform)
+    implementation platform(interlokCatalogPlatform)
+    compileOnly platform(interlokCatalogPlatform)
+    annotationProcessor platform(interlokCatalogPlatform)
+    testImplementation platform(interlokCatalogPlatform)
+    testCompileOnly platform(interlokCatalogPlatform)
+    testRuntimeOnly platform(interlokCatalogPlatform)
+    testAnnotationProcessor platform(interlokCatalogPlatform)
+    javadoc platform(interlokCatalogPlatform)
+    offlineJavadocPackages platform(interlokCatalogPlatform)
+    umlDoclet platform(interlokCatalogPlatform)
 
-    api ("com.adaptris:interlok-client-jmx:$interlokCoreVersion") {changing = true}
-    api ("com.adaptris:interlok-client:$interlokCoreVersion") {changing = true}
+    api ("com.adaptris:interlok-core") {changing = true}
+    api ("com.adaptris:interlok-common") {changing = true}
 
-    annotationProcessor ("com.adaptris:interlok-core-apt:$interlokCoreVersion")
-    umlDoclet("nl.talsmasoftware:umldoclet:2.1.0")
+    api ("com.adaptris:interlok-client-jmx") {changing = true}
+    api ("com.adaptris:interlok-client") {changing = true}
 
-    testImplementation ("org.junit.jupiter:junit-jupiter-engine:5.13.4")
-    testImplementation ("org.junit.platform:junit-platform-launcher:1.13.3")
-    testImplementation ("com.adaptris:interlok-stubs:$interlokCoreVersion") { changing=true }
-    testImplementation ("org.mockito:mockito-core:$mockitoVersion")
-    testImplementation ("org.mockito:mockito-inline:$mockitoVersion")
-    testImplementation ("org.awaitility:awaitility:4.3.0")
+    annotationProcessor ("com.adaptris:interlok-core-apt")
+    umlDoclet("nl.talsmasoftware:umldoclet")
+
+    testImplementation ("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation ("org.junit.platform:junit-platform-launcher")
+    testImplementation ("com.adaptris:interlok-stubs") { changing=true }
+    testImplementation ("org.mockito:mockito-core")
+    testImplementation ("org.awaitility:awaitility")
     // INTERLOK-3233 we still need log4j since we're doing MDC stuffs.
-    testImplementation ("org.apache.logging.log4j:log4j-core:$log4j2Version")
-    testImplementation ("org.apache.logging.log4j:log4j-api:$log4j2Version")
-    testImplementation ("org.apache.logging.log4j:log4j-1.2-api:$log4j2Version")
-	testImplementation ("org.apache.logging.log4j:log4j-slf4j2-impl:$log4j2Version")
+    testImplementation ("org.apache.logging.log4j:log4j-core")
+    testImplementation ("org.apache.logging.log4j:log4j-api")
+    testImplementation ("org.apache.logging.log4j:log4j-1.2-api")
+	testImplementation ("org.apache.logging.log4j:log4j-slf4j2-impl")
 
-    javadoc("com.adaptris:interlok-core-apt:$interlokCoreVersion")
-    offlineJavadocPackages ("com.adaptris:interlok-core:$interlokCoreVersion:javadoc@jar")
-    offlineJavadocPackages ("com.adaptris:interlok-common:$interlokCoreVersion:javadoc@jar")
+    javadoc("com.adaptris:interlok-core-apt")
+    offlineJavadocPackages ("com.adaptris:interlok-core::javadoc@jar")
+    offlineJavadocPackages ("com.adaptris:interlok-common::javadoc@jar")
   }
 
   javadoc {
