@@ -5,7 +5,7 @@ ext {
 }
 
 dependencies {
-  api ("com.adaptris:interlok-cluster-manager:$interlokCoreVersion") { changing = true}
+  api ("com.adaptris:interlok-cluster-manager") { changing = true}
   api project(':interlok-rest-base')
 
   testImplementation project(':interlok-rest-base').sourceSets.test.output

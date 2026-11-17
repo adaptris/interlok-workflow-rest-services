@@ -21,8 +21,8 @@ import com.adaptris.profiler.jmx.TimedThroughputMetric;
 import com.adaptris.profiler.jmx.TimedThroughputMetricMBean;
 import com.adaptris.rest.util.JmxMBeanHelper;
 
-import io.micrometer.prometheus.PrometheusConfig;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.micrometer.prometheusmetrics.PrometheusConfig;
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 
 public class InterlokProfilerMetricsGeneratorTest {
 
