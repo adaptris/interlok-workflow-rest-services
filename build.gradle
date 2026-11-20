@@ -11,7 +11,7 @@ plugins {
 }
 
 ext {
-  interlokCatalogVersion = project.findProperty('interlokCatalogVersion') ?: '5.0-SNAPSHOT'
+  interlokCatalogVersion = project.findProperty('interlokCatalogVersion') ?: '6.0-SNAPSHOT'
   interlokCatalogPlatform = "com.adaptris:interlok-version-catalog:${interlokCatalogVersion}"
   interlokCoreVersion = project.findProperty('interlokCoreVersion') ?: interlokCatalogVersion
   releaseVersion = project.findProperty('releaseVersion') ?: interlokCatalogVersion
